@@ -1,0 +1,530 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+"http://www.w3.org/TR/html4/loose.dtd">
+<!--  
+  Copyright (c) 2015 Thomas Dunnick (https://mywebspace.wisc.edu/tdunnick/web)
+  
+  This file is part of jPhineas.
+
+  jPhineas is free software: you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+
+  jPhineas is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  along with jPhineas.  If not, see <http://www.gnu.org/licenses/>.
+-->
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=us-ascii">
+		<style type="text/css">
+<!-- 
+table.navhelp td img { float:left; margin-right:10px; }
+table.navhelp td { vertical-align:top; } 
+-->
+</style>
+    <title>
+      JPhineas
+    </title>
+  </head>
+  <body>
+    <h2>
+      Contents
+    </h2>
+    <ul>
+      <li>
+        <a href="console/#Welcome">Welcome</a>
+      </li>
+      <li>
+        <a href="console/#Installation">Installation</a>
+      </li>
+      <li>
+        <a href="console/#Navigation">Navigation</a>
+      </li>
+      <li>
+        <a href="console/#General">General Configuration</a>
+      </li>
+      <li>
+        <a href="console/#Web">Securing the Console</a>
+      </li>
+      <li>
+        <a href="console/#Tags">Common Configuration Tags</a>
+      </li>
+      <li>
+        <a href="console/#Sender">Sender Configuration</a>
+      </li>
+      <li>
+        <a href="console/#Receiver">Receiver Configuration</a>
+      </li>
+      <li>
+        <a href="console/#Queues">Queue Configuration</a>
+      </li>
+      <li>
+        <a href="console/#Utilities">Utilities</a>
+      </li>
+    </ul>
+    <h2>
+      <a name="Welcome" id="Welcome">Welcome</a>
+    </h2>
+    <p>
+      You are now using an open source application designed to
+      work with the CDC <b>PHIN-MS</b> secure messaging system.
+      <b>jPhineas</b> includes several extension to functions
+      normally provided by <b>PHIN-MS</b>. These include a
+      monitor with dashboard and queue views, and a PHIN-MS
+      receiver servlet with configurable message handlers
+      ("helpers").
+    </p>
+    <h2>
+      <a name="Installation" id="Installation">Installation</a>
+    </h2>
+    <p>
+      If you received a ZIP file, unzip it to a folder of your
+      choice. In it you should find a <b>jphineas</b> folder and
+      <b>jphineas.war</b>. The folder contains the base
+      configuration files. Use a zip editor to modify
+      <b>WEB-INF/web.xml</b> in <b>jphineas.war</b> (I like
+      <b>7Zip</b>). Change the <b>&lt;param-value&gt;</b> of the
+      <b>&lt:context-param&gt;</b> from
+      /jphineas/config/jPhineas.xml to include the full paths to
+      the <b>jphineas/config</b> folder. For example, if you
+      unpacked the zip to <b>C:\usr</b> then...
+    </p>
+    <p>
+      <b>&lt;param-value&gt;/jphineas/config/jPhineas.xml&lt;/param-value&gt;</b>
+    </p>
+    <p>
+      would be changed to...
+    </p>
+    <p>
+      <b>&lt;param-value&gt;C:/usr/jphineas/config/jPhineas.xml&lt;/param-value&gt;</b>
+    </p>
+    <p>
+      You can run <b>jPhineas</b> from any J2EE web application
+      server that includes JSP support (Tomcat is the common
+      platform). If your server is configured to auto-deploy
+      <b>WAR</b> files simply copy or move <b>jphineas.war</b> to
+      the server's web applications folder. Otherwise you can
+      unzip to to the same location.
+    </p>
+    <p>
+      If the installation was succesful, you can access
+      <b>jPhineas</b> from your browser. The domain and port for
+      the URL will vary depending on your configuration, but the
+      path will be <b>/jphineas</b>. For a bone stock jPhineas
+      where you are browsing from the jPhineas server running at
+      port 80 the URL would be:
+    </p>
+    <b>http://localhost/jphineas</b>
+		<p>
+    You will need to adjust this depending on where you are
+    browsing from and other details like proxies, port numbers, etc.
+    If the installation was successful you will see the jPhineas
+		help page. 
+		</p>
+    <img src="images/help/help.gif" alt="help page">
+    <h2>
+      <a name="Navigation" id="Navigation">Navigation</a>
+    </h2>
+		<p>
+		  The top of each console page includes a set of navigation icons.
+			These are used to select various parts of the jPhineas console,
+			or to perform common actions (like refreshing the console).
+		</p>
+    <table summary="navigation buttons" class="navhelp">
+      <tr>
+        <td>
+          <img alt="show queues" src="images/queue.gif"> Queue Monitor - 
+					comprehensive details for <b>jPhineas</b> message queues. It consists
+          of three sections. On the right you will find a list of
+          queues and either (sender) routes or (received) party
+          ID's constraints for the selected queue. Click on any
+          of these links to modify the displayed rows.
+          <p>
+            On the left side is a table of rows for the selected
+            queue and (optional) constraint. Each row provides
+            complete details about that item. Use the scroll bar
+            to view undisplayed fields.  Below the table there
+            may be <b>Next</b> and/or <b>Previous</b> buttons
+            that can be used to display additional rows.
+          </p>
+           <p>
+            The bottom section contains details about the row
+            selected from the record table described above.
+            Selection is made by the <b>RECORDID</b>.  There is
+						also a <b>Delete</b> button to remove the displayed
+						record and a <b>Resend</b> button to attempt re-sending
+						failed message when appropriate.
+          </p>
+       </td>
+        <td>
+          <img src="images/help/queues.gif" alt="queues">
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <img src="images/dashboard.gif" alt="dashboard"> Dashboard -
+          an overview of jPhineas activity and status.
+          The Dashboard includes a pie chart, line and bar
+          graphs, and statistics. You can "drill down" to
+          specific data using the pie chart.
+          Clicking on any section of the pie chart produces
+          specifics for that route or party ID (depending on
+          queue).
+					<p>
+          Under the pie chart you may select an ending date for
+          the display (using the drop down calendar)
+          and the number of days to include in the
+          charts and statistics. Below that you may select the
+          queue of interest.
+					</p>
+        </td>
+        <td>
+          <img src="images/help/dashboard.gif" alt="dashboard top">
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <img alt="ping route" src="images/ping.gif"> CPA Export/Ping - 
+					Here you may export a Route CPA, or send an ebXML (PHIN-MS
+          style) Ping. The selected queue will be used to register 
+					the Ping and its acknowledgment.
+        </td>
+        <td>
+          <img src="images/help/ping.gif" alt="ping and cpa export">
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <img alt="show logs" src="images/loop.gif"> Logs -
+          shows logged events. Each log has its own tab,
+          and is shown in chronological order starting with the
+          newest entry. Only the most recent entries are shown.
+          Refer to the disk logs for complete listings.
+        </td>
+        <td>
+          <img src="images/help/logs.gif" alt="log display page">
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <img alt="configure" src="images/build.gif"> Configure - 
+					the configuration page. Configuration consists of a set 
+					of tabs and inputs. Instant "bubble help" is produced
+					by hovering the mouse over the item of interest.
+					<p>
+					Each tab includes an <b>OK</b> button. You must
+          click <b>OK</b> in order for any change to that tab to
+          be noted. Once a button is clicked on any tab, or you
+          navigate away from the Configure page, any other
+          changes will be lost.
+					<p>
+					The <b>Save/Revert</b> tab allows you to save the current
+					configuration, or revert the current configuration to a previously
+					saved version.  However, changes do not take effect until
+					a <b>Restart</b> (see below).
+          <br><br>
+          <img src="images/help/save.gif" alt="save configuration">
+        </td>
+        <td>
+          <img src="images/help/config.gif" alt="configuration page">
+        </td>
+      </tr>
+      <tr>
+        <td>
+        <img alt="print" src="images/print.gif">          
+          Print - prints the current page. This is the same action as your
+          browser print function.
+        <p>
+          <img alt="refresh" src="images/refresh.gif"> Refresh -
+          refreshes the page. This is the same action as your
+          browser refresh.
+        </p>
+				<p>
+          <img alt="restart" src="images/start.gif" id="restart" name="restart">
+          Restart - reloads the current configuration and restarts
+          jPhineas. After saving a change to the configuration
+					you must restart jPhineas for it to take effect.
+        </p>
+				<p>
+          <img alt="help" src="images/help.gif"> Help - shows the help
+					page (this page!).
+        </td>
+				<td>
+				  <img src="images/help/misc.gif" alt="miscellaneous">
+				</td>
+      </tr>
+    </table>
+    <h2>
+      <a name="General" id="General">General Configuration</a>
+    </h2>
+    <p>
+      JPhineas is typically configured from the console, but you
+      may optionally edit configuration files directly. Any
+      changes require a <b>Restart</b> of the application before they
+      will take effect. Configuration details can be found below.
+    </p>
+		<p>
+		  The configuration console provides a "three phase" approach
+			to the system behavior.  Initially is shows the "running"
+			configuration.  To make changes, select the tab(s) of 
+			interest and modify values as needed.  If you click the <b>OK</b>
+			button for a tab, your modifications to that tab are noted.  
+			Otherwise they will be (eventually) discarded.
+		</p>
+		<p>
+		  Modifications that have been noted can be saved or reverted
+			to previous values from the <b>Save/Revert</b> tab.  When you
+			save modifications a revision is created and the "running"
+			configuration updated.  When you revert modifications, the
+			"running" configuration is changed to the selected revision.
+			Neither operation has an effect until the next <b>Restart</b>.
+		</p>
+    <p>
+      <b>JPhineas</b> is configured from five XML files,
+      typically located in a <b>config</b> directory.  File and
+			directory references from within a given configuration file
+			will be made relative to its <b>&lt;DefaultDirectory&gt;</b>,
+			which in turn defaults to the parent of the directory holding
+			the configuration (see below). 
+		</p>
+		<p>
+		  Passwords appear in clear text in configuration files, so configurations
+		  should be protected at the file system level.  Given that PHIN-MS
+			typically carries PHI, the same security constraints provided to 
+			payloads should normally be applied to configurations as well (typically
+			storage behind a PCI buss with limited access).  Future provisions
+			will be made to encrypt configurations, but keep in mind that at some
+			level a clear text password (e.g. for the configuration encryption)
+			will necessarily exist and need to be	similarly secured.  In PHIN-MS
+			this is done by a simple substitution cipher that is easily broken,
+			so PHIN-MS configurations have the same security issues.
+    </p>
+    <ul>
+		  <li>jPhineas.xml - the primary configuration file specified in
+			web.xml and used by all parts of <b>jPhineas</b>.  This references
+			the remaining configurations below.</li>
+      <li>Queues.xml - persistence including queue types, names,
+      and connection details.
+      </li>
+      <li>Sender.xml - sender general details, routes, and folder
+      maps
+      </li>
+      <li>Receiver.xml - receiver general details and
+      service/action maps
+      </li>
+      <li>Console.xml - console queues and links to other
+      configurations
+      </li>
+    </ul>
+    <p>		
+			A typical directory tree for (non-web application) files
+			used by <b>jPhineas</b> looks like:
+		</p>
+		<pre>
+jphineas/ - the root
+  config/ - configurations
+    CPA/ - receiver CPA's
+    revisions/ - previous configurations
+    jPhineas.xml
+    Sender.xml
+    Receiver.xml
+    Queues.xml
+    Console.xml
+  CPA/ - exported Route CPA
+  data/ - payload files
+    incoming/ - received payloads
+    ack/ - outgoing acknowledgements
+    outgoing/ - outgoing payload files
+    processed/ - outgoing payloads that are queued
+	queues/ - files associated with the queue database
+  security/ - certificates used by jPhineas
+  replies/ - a cache of receiver responses to requests
+  tmp/ - temporary files
+		</pre>
+    <h2>
+      <a name="Web" id="Web">Securing the Console</a>
+    </h2>
+    <p>
+      To secure jPhineas you will need to modify
+      <b>jphineas/WEB-INF/web.xml</b> (see installation above).
+      Add (uncomment) the following to the end of <b>web.xml</b>
+      just before the final <b>&lt;/web-app&gt;</b> tag. Note
+      that you will need to configure the appropriate application
+      server <b>Realm</b> with the appropriate users and roles.
+    </p>
+    <pre>
+
+  &lt;security-constraint&gt;
+    &lt;web-resource-collection&gt;
+      &lt;web-resource-name&gt;The Entire console Application&lt;/web-resource-name&gt; 
+      &lt;url-pattern&gt;*.jsp&lt;/url-pattern&gt;
+      &lt;url-pattern&gt;*.html&lt;/url-pattern&gt; 
+    &lt;/web-resource-collection&gt;
+    &lt;auth-constraint&gt;
+      &lt;role-name&gt;consoleadmin&lt;/role-name&gt; 
+    &lt;/auth-constraint&gt;
+  &lt;/security-constraint&gt;
+  &lt;login-config&gt;
+    &lt;auth-method&gt;BASIC&lt;/auth-method&gt; 
+    &lt;realm-name&gt;JPhineas&lt;/realm-name&gt; 
+  &lt;/login-config&gt;
+  &lt;security-role&gt;
+    &lt;description&gt;A role defined for JPhineas console app.&lt;/description&gt; 
+    &lt;role-name&gt;consoleadmin&lt;/role-name&gt; 
+  &lt;/security-role&gt;
+
+</pre>Remember you will need to <b>Restart</b> your application server
+for updates to take effect.
+    <h2>
+      <a name="Tags" id="Tags">Common Configuration Tags</a>
+    </h2>
+    <p>
+      Common (shared) configuration tags unique to
+      <b>jPhineas</b> include:
+    </p>
+    <ul>
+      <li>
+        <b>&lt;HostId&gt;</b> - the Party ID for this server
+      </li>
+      <li>
+        <b>&lt;Domain&gt;</b> - the domain for this server
+      </li>
+      <li>
+        <b>&lt;Organization&gt;</b> - name associated with this
+        server
+      </li>
+      <li>
+        <b>&lt;Log&gt;</b> - logging subsection
+        <ul>
+          <li>
+            <b>&lt;LogName&gt;</b> - full path to the log file
+          </li>
+          <li>
+            <b>&lt;LogLevel&gt;</b> - ERROR, WARN, INFO, or DEBUG
+          </li>
+          <li>
+            <b>&lt;LogLocal&gt;</b> - true if source file
+            locations are desired
+          </li>
+        </ul>
+      </li>
+      <li>
+        <b>&lt;Name&gt;</b> - the name associated with any
+        subsection
+      </li>
+      <li>
+        <b>&lt;Service&gt;</b> - the service
+      </li>
+      <li>
+        <b>&lt;Action&gt;</b> - the action for a service
+      </li>
+      <li>
+        <b>&lt;Processor&gt;</b> - a Java class to handle message
+        specific processing
+      </li>
+      <li>
+        <b>&lt;Queue&gt;</b> - the name of the queue
+      </li>
+      <li>
+        <b>&lt;Id&gt;</b> - a user identifier for security
+        purposes
+      </li>
+      <li>
+        <b>&lt;Password&gt;</b> - a password for security
+        purposes
+      </li>
+      <li>
+        <b>&lt;Unc&gt;</b> - a file or web URL path
+      </li>
+    </ul>
+    <h2>
+      <a name="Sender" id="Sender">Sender Configuration</a>
+    </h2>
+    <p>
+      You will normally not need to change any of the <b>General Settings</b>
+			or <b>Logging</b>. However there are two key configurations needed to 
+			send a file (payload): 
+			<ol>
+			  <li>Route - this describes the internet connection that
+				will be made to a specific destination.  It is typically
+				a <b>Web URL</b> that can include authentication credentials.
+				The <b>Route</b> identifies the destinations <b>Party ID</b>
+				and must be <b>Exported</b> and delivered to the destination
+				(using email or some alternative method) before communications
+				can occur. You can think of the Route as a "telephone number"
+				<p></p>
+				</li>
+				<li>Map - this specifies the <b>Route</b>, the source
+				(directory) for files, the <b>Queue</b> for monitoring,
+				the encryption used, and the <b>Service/Action</b>.  If
+				you think of the <b>Route</b> as a telephone number, then
+				the <b>Service/Action</b> is the extension used to reach
+				a specific person.
+				<p>
+				  The <b>Map</b> also indicates where files should go once they
+					have been added to a queue, and where replies get stored.  They
+					may optionally specifiy <b>Arguments</b> and/or a <b>Recipient</b>.
+					These may be required by the <b>Route</b> destination for
+					additional processing.
+				</p> 
+				</li>
+			</ol>
+    </p>
+    <h2>
+      <a name="Receiver" id="Receiver">Receiver Configuration</a>
+    </h2>
+		  As with the <b>Sender</b>, you will normally not need to modify
+			the default <b>General Settings</b> or <b>Logging</b>.  You do
+			need to make sure to save sender (client) CPA files to the 
+			<b>CPA Directory</b>.
+			<p>
+			You probably want to create additional <b>Services</b>.  The
+			standard default and Ping services are predefined.  Unlike
+			PHIN-MS, each service can include a unique <b>Directory</b>
+			to receive payload files.  This makes routing payloads
+			convienient.  Likewise, each service can have its own unique
+			decryption parameters.  That allows you to optionally provide 
+			senders separate encryhption keys	for each service.
+    <h2>
+      <a name="Queues" id="Queues">Queue Configuration</a>
+    </h2>
+		  <b>jPhineas</b> comes pre-configured for a file based HSQLDB
+			set of queues. In most cases, you can plug in one or more 
+			existing PHIN-MS databases if you like, as the default configuration is
+			more or less compatible.  However, there is no support
+			for CLOB/BLOB objects (binary or large text) which means you can
+			not store payloads in a <b>jPhineas</b> queue.  That feature will
+			likely be added in the future.
+		  <b>Queue</b> configuration consists of three components:
+			<ol>
+			  <li>Queue - a queue is simply a table used to store status
+				for monitoring and dispatching payload (files).  Each <b>Queue</b>
+				has an associated <b>Type</b>, <b>Connection</b>, and <b>Table</b>.
+				Queues are identified by <b>Sender Maps</b> and 
+				<b>Receiver Services</b>.
+				<p></p></li>
+				<li>Queue Type - this describes the mapping from internal 
+				<b>jPhineas</b>	identifiers to actual table field names. There
+				are currently types for <b>Sender</b> and <b>Receiver</b> queues
+				defined, mapped to be compatible with standard PHIN-MS queues. You
+				do not normally modify these types.
+				<p></p></li>
+				<li>Connection - the implementation of a queue is made by the 
+				connection and includes Java <b>Class</b> identifiers and parameters
+				needed.  This will typically be a JDBC connection.  Refer to your
+				database provider for JDBC configuration guidance.
+				</li>
+			</ol>
+    <h2>
+      <a name="Utilities" id="Utilities">Utilities</a>
+    </h2>
+    <p>
+      TODO...
+    </p>
+  </body>
+</html>

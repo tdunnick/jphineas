@@ -1,0 +1,913 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- the receiver servlet configuration -->
+<Console>
+  <!-- logging -->
+  <Log>
+    <!-- full path to log file -->
+    <LogName></LogName>
+    <!-- amount of detail found in log -->
+    <LogLevel>debug</LogLevel>
+    <!-- enable source locations in log -->
+    <LogLocal>true</LogLocal>
+    <!-- number of days to keep a log -->
+    <LogDays></LogDays>
+  </Log>
+  <!-- Default directory for file or folder references -->
+  <DefaultDirectory></DefaultDirectory>
+   <!-- configuration revisions -->
+  <Revisions>config/revisions</Revisions>  
+  <!-- 
+    configuration page - set tabs, tags, and input for desired user configurations
+  -->
+  <Config>
+  <!-- sender configuration -->
+  <Tab>
+    <Name>Sender</Name>
+    <Tags>Sender</Tags>
+    <Help>
+      These settings are needed for jPhineas to send files and include
+      things like destination, file selections, transport,
+      encryption, and so forth.
+    </Help>
+    <Tab>
+      <Name>General Settings</Name>
+      <Help>
+        The general configuration shared by all sending Routes.
+      </Help>
+      <Input>
+        <Name>Queue Directory</Name>
+        <Tags>QueueDirectory</Tags>
+        <Type>dir</Type>
+        <Width>44</Width>
+        <Help>
+          A path to the directory (folder) where outgoing payloads are written
+          pending transmission.
+        </Help>
+      </Input>
+      <Input>
+        <Name>CPA Export Directory</Name>
+        <Tags>CpaDirectory</Tags>
+        <Type>dir</Type>
+        <Width>44</Width>
+        <Help>
+          A path to the directory (folder) where exported CPAs for Routes are
+          written.
+        </Help>
+      </Input>
+     <Input>
+        <Name>Polling Interval</Name>
+        <Tags>PollInterval</Tags>
+        <Type>number</Type>
+        <Help>
+			    The jPhineas sender periodically checks designated folders for
+			    files ready to process, and queues for messages ready to send.
+			    The PollInterval determines the frequency in seconds
+			    of these checks.
+        </Help>
+      </Input>
+      <Input>
+        <Name>Number of Senders</Name>
+        <Tags>MaxThreads</Tags>
+        <Type>number</Type>
+        <Help>
+			    This determines how many connections for outgoing transmissions the sender may
+			    have active at any one time.  Three is a typical maximum value.
+        </Help>
+      </Input>
+      <Input>
+        <Name>Certificate Authority</Name>
+        <Tags>TrustStore</Tags>
+        <Type>file</Type>
+        <Help>
+			    The Certificate Authority is a Java keystore of authorized certificates.  
+			    It is used to authenticate receivers  for HTTPS connections.  If not given, 
+			    receivers will not be required to authenticate.
+        </Help>
+      </Input>
+      <Input>
+        <Name>Authority Password</Name>
+        <Tags>TrustStorePassword</Tags>
+        <Type>password</Type>
+        <Help>
+          This is used to encrypt/decrypt the Certificate Authority.
+        </Help>
+      </Input>
+    </Tab> <!-- general settings -->
+    <Tab>
+      <Name>Logging</Name>
+      <Tags>Log</Tags>
+      <Help>
+        Settings affecting the Sender's logging.
+      </Help>
+      <Input>
+        <Name>Log Name</Name>
+        <Tags>LogName</Tags>
+        <Type>text</Type>
+        <Width>44</Width>
+        <Help>
+          This specifies the full path name to the Sender's log file.
+        </Help>
+      </Input>
+      <Input>
+        <Name>Log Level</Name>
+        <Tags>LogLevel</Tags>
+        <Type>radio</Type>
+        <Options>debug info warn error</Options>
+        <Help>
+          This determines the amount and type of logging in the Sender's log file.
+        </Help>
+      </Input>
+      <Input>
+        <Name>Log Local</Name>
+        <Tags>LogLocal</Tags>
+        <Type>radio</Type>
+        <Options>true false</Options>
+        <Help>
+          When this is true, the source code location is included in the logging.
+        </Help>
+      </Input>
+      <Input>
+        <Name>Log Rotation (in days)</Name>
+        <Tags>LogDays</Tags>
+        <Type>number</Type>
+        <Help>
+          Logs are rotated daily, and discarded after this number of days if provided.
+        </Help>
+      </Input>
+    </Tab> <!-- logging --> 
+    <Tab>
+      <Name>Routes</Name>
+      <Help>
+        A Route is used by the sender to select a physical end point for
+        the transport.  That includes things like the domain name, path,
+        ports, and protocol.  It also determines the CPA required by
+        the receiver.
+      </Help>
+      <Set>
+        <Tags>RouteInfo Route</Tags>
+        <Input>
+          <Tags>Name</Tags>
+          <Type>text</Type>
+          <Width>24</Width>
+          <Help>
+            The Name identifies a sender's route.
+          </Help>
+        </Input>
+        <Input>
+          <Name>Party ID</Name>
+          <Tags>PartyId</Tags>
+          <Type>text</Type>
+          <Width>24</Width>
+          <Help>
+			      The Receiver's PartyId for the route, and identifies the destination
+			      for the route. CDC issues these for PHINMS installation.  However, it can be
+			      any unique identifier designated by the receiver. Your Receiver must 
+			      provide this in order for you to create a route to them.
+          </Help>
+        </Input>
+        <Input>
+          <Tags>Cpa</Tags>
+          <Type>24</Type>
+          <Help>
+			      This identifies the Communication Protocol Agreement file
+			      used for the route connection.
+			      The naming convention is the receiver and sender PartyId, separated
+			      by a period.  You will need to export this and provide it to the
+			      Receiver for this route.
+          </Help>
+        </Input>
+        <Input>
+          <Name>Receiver Domain Name</Name>
+          <Tags>Host</Tags>
+          <Type>text</Type>
+          <Width>24</Width>
+          <Help>
+			      The domain or IP designation for the receiver
+			      (e.g. "some.remote.receiver.gov").
+          </Help>
+        </Input>
+        <Input>
+          <Tags>Path</Tags>
+          <Type>text</Type>
+          <Width>24</Width>
+          <Help>
+			      The Path is the URL path expected by the receiver (typically
+			      "/receiver/receivefile" for PHINMS hosts or "/jphineas/receiver" for
+			      a jPhineas host).
+          </Help>
+        </Input>
+        <Input>
+          <Tags>Port</Tags>
+          <Type>number</Type>
+          <Help>
+			      The Port is the port used by the receiver (typically 80 for 
+			      non-encryption, or 443 for encrypted connections).
+          </Help>
+        </Input>
+        <Input>
+          <Tags>Protocol</Tags>
+          <Type>select</Type>
+          <Options>http https</Options>
+          <Help>
+			      The Protocol determines whether SSL encryption and optional
+			      authentication is selected for the connection.
+          </Help>
+        </Input>
+        <Input>
+          <Tags>Timeout</Tags>
+          <Type>number</Type>
+          <Help>
+			      After the sender transmits a payload request, it waits for a
+			      response.  If it waits longer than the Time out in seconds, it
+			      assumes there is some problem with the receiver or networks and
+			      optionally retries the send.  The Timeout will double for each
+			      retry.
+          </Help>
+        </Input>
+        <Input>
+          <Tags>Retry</Tags>
+          <Type>number</Type>
+          <Help>
+			      After a Timeout or connection failure, an attempt may be made 
+			      to resend the message.  This determines how many times 
+			      that attempt will be made.
+          </Help>
+        </Input>
+        <Input>
+          <Tags>Authentication Type</Tags>
+          <Type>select</Type>
+          <Option/>
+          <Options>none basic certificate sdn</Options>
+          <Help>
+			      If the sender must authenticate itself to the receiver for 
+			      an SSL connection, the method is specified by the 
+			      Authentication Type.  Currently only certificate authentication
+			      is supported.
+          </Help>
+        </Input>
+        <Input>
+          <Tags>Authentication Id</Tags>
+          <Type>text</Type>
+          <Width>24</Width>
+          <Help>
+			      An Authentication ID specifies the DN 
+			      (distinguished name or Subject) identified in the encryption
+			      payload envelop.  It is only needed to select a specific
+			      certificate from a store, and is normally derived from
+			      the certificate if left blank. This will be matched against the 
+			      receiver's decryption certificate.
+          </Help>
+        </Input>
+        <Input>
+           <Tags>Authentication Password</Tags>
+          <Type>password</Type>
+          <Help>
+			      The Authentication Password is used to optionally decrypt the 
+			      Authentication certificate.
+          </Help>
+        </Input>
+        <Input>
+          <Tags>Authentication Unc</Tags>
+          <Type>text</Type>
+          <Width>44</Width>
+          <Help>
+			      The certificate store used for authentication is specified by
+			      the Authentication Unc (Universal Naming Convention).  
+			      Currently only file based names are supported.
+			      This can be in PEM, DER, or PKCS12 formats.
+          </Help>
+        </Input>
+        <Input>
+          <Tags>Authentication BaseDn</Tags>
+          <Type>text</Type>
+          <Width>44</Width>
+          <Help>
+            The Base DN identifies the branch of a LDAP tree to search for an
+            authentication certificate.  Use this if your Sender uses a
+            vendor such as Verisign for SDN services.
+          </Help>
+        </Input>
+        <Input>
+          <Tags>Authentication DN</Tags>
+          <Type>text</Type>
+          <Width>44</Width>
+          <Help>
+            The DN identifies the specific location in an LDAP tree of an 
+            authentication certificate.  Use this if your Sender uses a
+            vendor such as Verisign for SDN services.
+          </Help>
+        </Input>
+      </Set>
+    </Tab> <!-- routes -->
+    <Tab>
+      <Name>Maps</Name>
+      <Help>
+        A sender's map associates files with a Route and Queue.  When
+        those files get selected for transport they will be 
+        recorded in the Queue and sent to the Route's destination.
+      </Help>
+      <Set>
+        <Tags>MapInfo Map</Tags>
+        <Input>
+          <Tags>Name</Tags>
+          <Type>text</Type>
+          <Width>24</Width>
+          <Help>
+            The Name of the sender map associated with a file folder.
+          </Help>
+        </Input>
+         <Input>
+          <Tags>Source</Tags>
+          <Type>dir</Type>
+          <Help>
+			      The Source directory (folder) is periodically checked for files to be added to a
+			      queue (and subsequently processed or sent).  This can include
+			      wild card designations to restrict which files get selected
+			      (for example, "data/outgoing/*.txt").
+          </Help>
+       </Input>
+        <Input>
+          <Tags>Processed</Tags>
+          <Type>dir</Type>
+          <Help>
+			      The Processed directory (folder) gets files after they have been processed
+			      by the folder poller.
+          </Help>
+        </Input>
+        <Input>
+          <Tags>Acknowledged</Tags>
+          <Type>dir</Type>
+          <Help>
+			      After the queue processors is finished it will add a status
+			      message from the remote receiver to a file in the Acknowledged
+			      folder.
+          </Help>
+        </Input>
+        <Input>
+          <Tags>Queue</Tags>
+          <Type>select</Type>
+          <Ref>Queues QueueInfo Queue</Ref>
+          <Match>Send</Match>
+          <Help>
+			      The name of the Queue used to record files processed from
+			      a folder map.
+          </Help>
+        </Input>
+        <!--
+        <Input>
+          <Tags>Processor</Tags>
+          <Type>select</Type>
+          <Option>tdunnick.jphineas.sender.ebxml.EbXmlFolderProcessor</Option>
+          <Help>
+			      The type of Processor used for this folder.  Currently only
+			      ebxml is supported.  Future versions may include other protocols
+			      like MLLP.
+          </Help>
+        </Input>
+        <Input>
+          <Tags>Filter</Tags>
+          <Type>select</Type>
+          <Help>
+            The Filter is a Java class which implements 
+            tdunnick.jphineas.filter.PhineasInputFilter.  
+            The payload may be run through
+            this filter prior to being queued for transmission.  A typical use
+            would be to data broker an HL7 message.
+          </Help>
+        </Input>
+         -->
+        <Input>
+          <Tags>Route</Tags>
+          <Type>select</Type>
+          <Ref>Sender RouteInfo Route</Ref>
+          <Help>
+			      The Route designates the payload destination for a selected folder 
+			      mapping.
+          </Help>
+        </Input>
+        <Input>
+          <Tags>Service</Tags>
+          <Type>text</Type>
+          <Width>24</Width>
+          <Help>
+			      The Service (and Action) identifies how the receiver should 
+			      handle the incoming request (payload).
+          </Help>
+        </Input>
+        <Input>
+          <Tags>Action</Tags>
+          <Type>text</Type>
+          <Width>24</Width>
+          <Help>
+			      The Action (and Service) identifies how the receiver should 
+			      handle the incoming request (payload).
+          </Help>
+        </Input>
+        <Input>
+          <Tags>Arguments</Tags>
+          <Type>text</Type>
+          <Width>80</Width>
+          <Help>
+			      The sender can pass optional Arguments to the receiver to further
+			      affect processing of the request.
+          </Help>
+        </Input>
+        <Input>
+          <Tags>Recipient</Tags>
+          <Type>text</Type>
+          <Width>80</Width>
+          <Help>
+            The Sender can pass an optional Recipient designation to the Receiver.
+          </Help>
+        </Input>
+        <Input>
+          <Tags>Encryption Type</Tags>
+          <Type>select</Type>
+          <Option/>
+          <Options>certificate LDAP PBE</Options>
+           <Help>
+			      If payload encryption is desired, the Encryption Type determines
+			      the method.
+          </Help>
+        </Input>
+        <Input>
+          <Tags>Encryption Id</Tags>
+          <Type>text</Type>
+          <Width>24</Width>
+          <Help>
+			      An Encryption Id specifies optional the DN 
+			      (distinguished name or Subject) identified to the 
+			      receiver in the encryption payload.
+          </Help>
+        </Input>
+        <Input>
+          <Tags>Encryption Password</Tags>
+          <Type>password</Type>
+          <Help>
+            The Encryption Password is used to decrypt the certificate.
+          </Help>
+        </Input>
+        <Input>
+          <Tags>Encryption Unc</Tags>
+          <Type>text</Type>
+          <Width>44</Width>
+          <Help>
+			      The certificate to use for encryption is specified by
+			      the Encryption Unc (Universal Naming Convention).
+			      Currently only file based names are supported.
+			      This can be in PEM, DER, or PKCS12 formats.
+          </Help>
+        </Input>
+      </Set>
+    </Tab>
+  </Tab>
+  <!-- receiver configuration -->
+  <Tab>
+    <Name>Receiver</Name>
+    <Tags>Receiver</Tags>
+    <Help>
+      When a message is received by jPhineas, the service requested
+      determines how (or if) that message will be processed.  Services
+      define this processing.
+    </Help>
+    <Tab>
+      <Name>General Settings</Name>
+      <Help>
+        General settings applied to the jPhineas receiver.
+      </Help>
+      <Input>
+        <Name>Payload Directory</Name>
+        <Tags>PayloadDirectory</Tags>
+        <Type>dir</Type>
+        <Width>44</Width>
+        <Help>
+          A path to the directory (folder) where incoming payloads are written
+          by default.  This can be over-ridden in the Service.
+        </Help>
+      </Input>
+      <Input>
+        <Name>CPA Directory</Name>
+        <Tags>CAPDirectory</Tags>
+        <Type>dir</Type>
+        <Width>44</Width>
+        <Help>
+          A path to the directory (folder) where CPA (Communication Protocol
+          Agreements) are stored.  Each incoming message must specify an existing
+          CPA or it will be refused.  The CPA is created by the Sender and provided
+          to the Receiver for installation in this directory.
+        </Help>
+      </Input>
+      <Input>
+        <Name>Reply Cache Directory</Name>
+        <Tags>CacheDirectory</Tags>
+        <Type>dir</Type>
+        <Width>44</Width>
+        <Help>
+          A path to the directory (folder) where cached replies are stored.
+          If the cache has a reply matching the incoming request it is immediately
+          sent back (a duplicate request). Otherwise the request is new,
+          processed normally, and the reply added to the cache.
+        </Help>
+      </Input>
+    </Tab> <!--  general settings -->
+    <Tab>
+      <Name>Logging</Name>
+      <Tags>Log</Tags>
+      <Help>
+        Settings affecting the receiver's logging.
+      </Help>
+      <Input>
+        <Name>Log Name</Name>
+        <Tags>LogName</Tags>
+        <Type>text</Type>
+        <Width>44</Width>
+        <Help>
+          This specifies the full path name to the Receiver's log file.
+        </Help>
+      </Input>
+      <Input>
+        <Name>Log Level</Name>
+        <Tags>LogLevel</Tags>
+        <Type>radio</Type>
+        <Options>debug info warn error</Options>
+        <Help>
+          This determines the amount and type of logging in the Receiver's log file.
+        </Help>
+      </Input>
+      <Input>
+        <Name>Log Local</Name>
+        <Tags>LogLocal</Tags>
+        <Type>radio</Type>
+        <Options>true false</Options>
+        <Help>
+          When this is true, the source code location is included in the logging.
+        </Help>
+      </Input>
+      <Input>
+        <Name>Log Rotation (in days)</Name>
+        <Tags>LogDays</Tags>
+        <Type>number</Type>
+        <Help>
+          Logs are rotated daily, and discarded after this number of days if provided.
+        </Help>
+      </Input>
+    </Tab> <!-- logging --> 
+    <Tab>
+      <Name>Services</Name>
+      <Help>
+        Each service maps to a "service" and "action" pair.
+        This provides the specific actions associated with each request.
+      </Help>
+      <Set>
+        <Tags>ServiceInfo Service</Tags>
+        <Input>
+          <Tags>Name</Tags>
+          <Type>text</Type>
+          <Width>24</Width>
+          <Help>
+            The Name is used to identify a receiver's service mapping.
+          </Help>
+        </Input>
+         <Input>
+          <Tags>Service</Tags>
+          <Type>text</Type>
+          <Width>24</Width>
+          <Help>
+            The sender designates the Service in the ebXML which is then
+            matched to the one specified here.
+          </Help>
+        </Input>
+        <Input>
+          <Tags>Action</Tags>
+          <Type>text</Type>
+          <Width>24</Width>
+          <Help>
+            The sender designates the Action in the ebXML which is then
+            matched to the one specified here.
+          </Help>
+        </Input>
+        <Input>
+          <Tags>Queue</Tags>
+          <Type>select</Type>
+          <Ref>Queues QueueInfo Queue</Ref>
+          <Match>Receive</Match>
+          <Help>
+            Received messages are recorded in the Queue for this service.
+            See the Queue configurations for more information.
+          </Help>
+        </Input>
+        <Input>
+          <Tags>Filter</Tags>
+          <Type>text</Type>
+          <Width>44</Width>
+          <Help>
+            The Filter is a Java class which implements 
+            tdunnick.jphineas.filter.PhineasOutputFilter.  
+            The payload may be run through
+            this filter prior to being stored on disk.  A typical use
+            would be to data broker an HL7 message.
+          </Help>
+        </Input>
+        <Input>
+          <Tags>Directory</Tags>
+          <Type>dir</Type>
+          <Help>
+            Received payloads are written to the Directory found in this
+            service.
+          </Help>
+        </Input>
+        <Input>
+          <Tags>Decryption Type</Tags>
+          <Type>select</Type>
+          <Option/>
+          <Options>none certificate LDAP PBE</Options>
+          <Help>
+            Payloads may be decrypted using PEM, DER, or PKCS12 certificates.
+            This specifies the decryption certificate/key. Otherwise payloads
+            are not decrypted.
+          </Help>
+        </Input>
+        <Input>
+           <Tags>Decryption Id</Tags>
+          <Type>text</Type>
+          <Width>24</Width>
+          <Help>
+            An Decryption Id specifies optional the DN 
+            (distinguished name or Subject)
+            used to match against the sender's encryption certificate.
+          </Help>
+        </Input>
+        <Input>
+          <Tags>Decryption Password</Tags>
+          <Type>password</Type>
+          <Help>
+            The Decryption Password is used to decrypt the certificate/key.
+          </Help>
+        </Input>
+        <Input>
+          <Tags>Decryption Unc</Tags>
+          <Type>text</Type>
+          <Width>44</Width>
+          <Help>
+            The certificate or key to use for decryption is specified by
+            the Decryption UNC (Universal Naming Convention).  
+          </Help>
+        </Input>
+      </Set>
+    </Tab> <!-- services -->
+  </Tab> <!-- receiver -->
+  <!-- queues -->
+  <Tab>
+    <Name>Queues</Name>
+    <Help>
+      Message sent and received by jPhineas are recorded and processed
+      from queues. Just like the line at a fast food chain, messages
+      in queues are "first come first served" or FIFO (first in first out).
+      Each queue has a type and connection associated with it.
+    </Help>
+    <Tab>
+      <Name>Queues</Name>
+      <Help>
+        A jPhineas Queue is used to record and control transport activities.
+        It's underlying implementation is generally a database table and
+        associated driver.
+      </Help>
+      <Set>
+        <Tags>Queues QueueInfo Queue</Tags>
+        <Input>
+          <Tags>Name</Tags>
+          <Type>text</Type>
+          <Width>24</Width>
+          <Help>
+            The name associated with a specific queue.
+          </Help>
+        </Input>
+        <Input>
+          <Tags>Type</Tags>
+          <Type>select</Type>
+          <Ref>Queues TypeInfo Type</Ref>
+          <Help>
+			      The Type of queue determines which fields are supported
+			      (see queue Type).
+          </Help>
+        </Input>
+        <Input>
+          <Tags>Connection</Tags>
+          <Type>select</Type>
+          <Ref>Queues ConnectionInfo Connection</Ref>
+          <Help>
+            The Connection used for accessing the queue (see queue Connection).
+          </Help>
+        </Input>
+        <Input>
+          <Tags>Table</Tags>
+          <Type>text</Type>
+          <Width>44</Width>
+          <Help>
+			      The name of the Table for this queue.  Note for a file queue
+			      this makes up part of the file name.
+          </Help>
+        </Input>
+      </Set>
+    </Tab>
+    <Tab>
+      <Name>Queue Types</Name>
+      <Help>
+        The Queue Type identifies the fields of Queue, although the physical
+        implementation may include additional fields and/or have
+        order differences. Queue Types should begin with a "RECORDID" field.
+        EbXml queues are expected to have a specific set of fields present,
+        so you should NOT delete any found there. 
+        The EbXml defaults are fully compatible with existing
+        PHINMS databases.
+      </Help>
+      <Set>
+        <Tags>Queues TypeInfo Type</Tags>
+        <Input>
+          <Tags>Name</Tags>
+          <Type>text</Type>
+          <Width>24</Width>
+          <Help>
+            The Name identifing the queue type.
+          </Help>
+        </Input>
+        <Input>
+          <Tags>Field</Tags>
+          <Repeats>true</Repeats>
+          <Type>text</Type>
+          <Width>24</Width>
+          <Help>
+			      One or more Field names for the queue.  Note that all queues
+			      are expected to begin with a RecordId.  The Add Field button
+			      can be used to add additional fields.  Blank fields are removed.
+          </Help>
+        </Input>
+      </Set>
+    </Tab>
+    <Tab>
+      <Name>Connections</Name>
+      <Help>
+        A jPhineas Queue is associated with a Connection that determines
+        the physical implementation of a queue.  This is typically a
+        database connection, but jPhineas also offers a light weight
+        file based connection.
+      </Help>
+      <Set>
+        <Tags>Queues ConnectionInfo Connection</Tags>
+        <Input>
+          <Tags>Name</Tags>
+          <Type>text</Type>
+          <Width>24</Width>
+          <Help>
+            The Name used to identify a queue connection.
+          </Help>
+        </Input>
+        <Input>
+          <Tags>Class</Tags>
+          <Type>select</Type>
+          <Options>tdunnick.jphineas.queue.PhineasJDBCQ tdunnick.jphineas.queue.PhineasMemQ</Options>
+          <Help>
+			      The type of connection.
+          </Help>
+        </Input>
+        <Input>
+          <Tags>Id</Tags>
+          <Type>text</Type>
+          <Width>24</Width>
+          <Help>
+			      The Id is optionally used to authenticate the queue
+			      connection.
+          </Help>
+        </Input>
+        <Input>
+          <Tags>Password</Tags>
+          <Type>password</Type>
+          <Help>
+			      The Password is optionally used to authenticate the queue
+			      connection.
+          </Help>
+        </Input>
+        <Input>
+          <Tags>Unc</Tags>
+          <Type>text</Type>
+          <Width>44</Width>
+          <Help>
+			      A queue connection is accessed by a Unc (Universal 
+			      Naming Convention) path.  The nature
+			      of the path is determined by the connection type (for example
+			      JDBC conventions).
+			    </Help>
+        </Input>
+        <Input>
+          <Tags>Driver</Tags>
+          <Type>text</Type>
+          <Width>44</Width>
+          <Help>
+            A vendor provided (JDBC) driver for the connection.
+          </Help>
+        </Input>
+        <Input>
+          <Tags>Flush</Tags>
+          <Type>text</Type>
+          <Width>44</Width>
+          <Help>
+            A string used by the connection to flush updates before closing.
+          </Help>
+        </Input>
+      </Set>
+    </Tab>
+  </Tab>
+  <Tab>
+    <Name>Server</Name>
+    <Tags>jPhineas</Tags>
+    <Help>
+      These are general settings are shared by all aspects of a jPhineas server.
+    </Help>
+     <Input>
+       <Name>Party ID</Name>
+       <Tags>HostId</Tags>
+       <Type>text</Type>
+       <Width>44</Width>
+       <Help>
+         This is an identifier used to designate this server.
+         These may be assigned by the CDC, but the only restriction is that
+         it uniquely identifies a message end point.  It is commonly used with
+         the remote server's Party ID to name a CPA (Communication Protocol Agreement).
+       </Help>
+     </Input>
+     <Input>
+       <Tags>Domain</Tags>
+       <Type>text</Type>
+       <Width>44</Width>
+       <Help>
+         The domain name of the server. This will default to whatever
+         is returned by the server, but should reflect the domain expected and
+         seen by the remote service.
+       </Help>
+     </Input>
+     <Input>
+       <Tags>Organization</Tags>
+       <Type>text</Type>
+       <Width>44</Width>
+       <Help>
+         This describes or names the server's sponsor, company,
+         group, etc.
+       </Help>
+     </Input>
+     <Input>
+       <Name>Log Name</Name>
+       <Tags>Log LogName</Tags>
+       <Type>text</Type>
+       <Width>44</Width>
+       <Help>
+         This specifies the full path name to the general log file.
+       </Help>
+     </Input>
+     <Input>
+       <Name>Log Level</Name>
+       <Tags>Log LogLevel</Tags>
+       <Type>radio</Type>
+       <Options>debug info warn error</Options>
+       <Help>
+         This determines the amount and type of logging in the general log file.
+       </Help>
+     </Input>
+     <Input>
+       <Name>Log Local</Name>
+       <Tags>Log LogLocal</Tags>
+       <Type>radio</Type>
+       <Options>true false</Options>
+       <Help>
+         When this is true, the source code location is included in the logging.
+       </Help>
+     </Input>
+     <Input>
+       <Name>Log Rotation (in days)</Name>
+       <Tags>Log LogDays</Tags>
+       <Type>number</Type>
+       <Help>
+         Logs are rotated daily, and discarded after this number of days if provided.
+       </Help>
+     </Input>
+  </Tab>
+  <Tab>
+    <Name>Save/Revert</Name>
+    <Help>
+      The jPhineas configuration is loaded from a disk file when the
+      program starts.  That is the current configuration.  When a
+      configuration is saved, it is stored 
+      as a revision, and becomes the current configuration.  
+      You may revert to a previous revision at any time. Note configuration changes
+      do not take effect until a restart.
+    </Help>
+    <Input>
+      <Tags>Revision</Tags>
+      <Type>select</Type>
+      <Ref>Revisions</Ref>
+      <Help>
+			  The configuration for jPhineas is read from the specified revision.
+      </Help>
+    </Input>
+  </Tab>
+ </Config>
+ </Console>

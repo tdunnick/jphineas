@@ -1,0 +1,194 @@
+/*
+ *  Copyright (c) 2015 Thomas Dunnick (https://mywebspace.wisc.edu/tdunnick/web)
+ *  
+ *  This file is part of jPhineas.
+ *
+ *  jPhineasis free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  jPhineas is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with jPhineas.  If not, see <http://www.gnu.org/licenses/>.
+ */
+ 
+@CHARSET "ISO-8859-1";
+
+/*********************************** general shared settings *****************************/
+body {
+	border: single 4px black;
+	background-color: #ddd;
+}
+div.heading {
+	padding-top: 20px;
+	font-size: 35px;
+	font-weight: bold;
+	padding-bottom: 2px;
+}
+/* link treatments */
+a { color:#000088; }
+a:hover {
+	font-weight: bold;
+	color: black;
+}
+.button a {
+	border-style: solid;
+	border-width: 1px;
+	padding-left: 10px;
+	padding-right: 10px;
+	text-decoration: none;
+	background-color: #eeeeff;
+	font-size: 12px;
+	color: black;
+}
+.button a:hover {
+	font-weight: bold;
+}
+a img {border:transparent; width:48px; }
+
+/************************************ decorator specific *******************************/
+/* the navigation */
+.navigation table { width: 100%; background:#008; color:white; }
+.navigation table img { border:transparent; width:48px; }
+.navigation td#title {  font-size: 35px;  font-weight: bold; float:right; }
+	
+/* a common footer */
+.footer div { margin-top:40px; font-size:12px; }
+
+/********************************** dashboard settings ************************/
+.dashboard table { width: 100%; }
+.dashboard td { padding-left: 10px; vertical-align: top; }
+
+/*************************** queue record display settings *********************/
+div.queuerows { 
+	vertical-align:top; 
+	width:75%; 
+	margin-right:20px;
+	overflow: hidden;
+	float:left; 
+}
+div.records {
+	width:680px;	
+  border-width:1px; 
+  border-style:solid; 
+	overflow: auto;
+}
+div.records th {
+	border: solid 1px black;
+	font-size: 12px;
+	font-weight: bold;
+	color: #0000aa;
+	background-color: #ddffff;
+}
+div.records tr.ok {
+	background-color: #ddffdd;
+}
+div.records tr.fail {
+	background-color: #ff8888;
+}
+div.records tr.attempted {
+	background-color: #eeeeee;
+}
+div.records td {
+	white-space: nowrap;
+	font-size:10px;
+	border: solid 1px black;
+	padding: 1px 4px 1px 4px;
+}
+div.queuetables {
+	width:20%; 
+  vertical-align:top; 
+  border-style:double; 
+  border-width:4px; 
+  padding:5px;
+  float:right;
+}
+div.queuetables span {
+	margin-left:11px;
+	font-size:11px;
+}
+table.details {
+	line-height:12px;
+}
+table.details a {
+	margin-left:25px;
+}
+table.details img {
+  width:25px;
+  height:25px;
+}
+table.details td {
+	font-size: 12px;
+}
+
+/******************************* console yetti tabs *********************************/
+div.configlayout {
+	width:99%;
+	margin:0 0 20px 0;
+	/* border:1px solid #888; */
+}
+ul.configlayout {
+	width:100%;
+	list-style:none;
+	margin:0;
+	padding:0;
+	float:left;
+	background-image:url("../images/border.gif");
+	background-position:bottom;
+	background-repeat:repeat-x;
+}
+ul.configlayout li {
+	margin:0 0 0 0;
+	float:left;
+	background:#ccc;
+}
+ul.configlayout li a {
+	border:1px solid #888;
+	float:left;
+	display:block;
+	padding:4px 8px;
+	color:#000;
+	text-decoration:none;
+	font-weight:bold;
+}
+ul.configlayout li a:hover {
+	background:#ddd;
+	outline:0;
+}
+ul.configlayout li a.active {
+	cursor:default;
+	border-bottom:1px solid #ddd;
+	background:#ddd;
+	color:#00f;
+}
+.tabs-container {
+	clear:left;
+	border:#888 1px solid;
+	border-top:0;
+	padding:25px 10px 0 10px;
+}
+
+/******************************** bubble help ****************************/
+.tip {
+	width:200px; 
+	color:RED;
+	font:11px arial,sans-serif;
+	text-decoration:none;
+	text-align:left;
+	position:absolute;
+}
+.tip span.top {
+	padding:30px 8px 0;
+	background:url("../images/tip.gif") no-repeat top;
+	display:block;
+}
+.tip span.bottom {
+	padding:3px 8px 15px;
+	background:url("../images/tip.gif") no-repeat bottom;
+	display:block;
+}

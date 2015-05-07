@@ -1,0 +1,4 @@
+Manifest-Version: 1.0
+Class-Path: 
+Require-Bundle: org.apache.log4j;bundle-version="1.2.13"
+

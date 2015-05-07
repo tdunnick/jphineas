@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app id="WebApp_ID" version="2.4" xmlns="http://java.sun.com/xml/ns/j2ee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd">
+	<display-name>jPhineas</display-name>
+
+  <filter>
+    <filter-name>sitemesh</filter-name>
+    <filter-class>com.opensymphony.sitemesh.webapp.SiteMeshFilter</filter-class>
+  </filter>
+  <filter-mapping>
+    <filter-name>sitemesh</filter-name>
+    <url-pattern>*</url-pattern>
+  </filter-mapping>
+  
+  <!-- set this param-value to the master configuration file -->
+  <context-param>
+    <param-name>Configuration</param-name>
+    <param-value>/jphineas/config/jPhineas.xml</param-value>
+  </context-param>
+  
+  <listener>
+    <listener-class>tdunnick.jphineas.queue.PhineasQListener</listener-class>
+  </listener>
+
+  <servlet>
+    <description>jPhineas Message Sender</description>
+    <display-name>Sender</display-name>
+    <servlet-name>Sender</servlet-name>
+    <servlet-class>tdunnick.jphineas.sender.Sender</servlet-class>
+    <load-on-startup>1</load-on-startup>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>Sender</servlet-name>
+    <url-pattern>/sender</url-pattern>
+  </servlet-mapping>
+ 
+	<servlet>
+    <description>jPhineas Message Receiver</description>
+    <display-name>Receiver</display-name>
+    <servlet-name>Receiver</servlet-name>
+    <servlet-class>tdunnick.jphineas.receiver.Receiver</servlet-class>
+    <load-on-startup>1</load-on-startup>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>Receiver</servlet-name>
+    <url-pattern>/receiver</url-pattern>
+  </servlet-mapping>
+
+  <servlet>
+    <description>jPhineas Console</description>
+    <display-name>Console</display-name>
+    <servlet-name>Console</servlet-name>
+    <servlet-class>tdunnick.jphineas.console.Console</servlet-class>
+    <load-on-startup>1</load-on-startup>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>Console</servlet-name>
+    <url-pattern>/console/*</url-pattern>
+  </servlet-mapping> 
+  
+  <!-- optional security settings
+  <security-constraint>
+    <web-resource-collection>
+      <web-resource-name>The Entire console Application</web-resource-name> 
+      <url-pattern>/console/*</url-pattern> 
+    </web-resource-collection>
+    <auth-constraint>
+      <role-name>consoleadmin</role-name> 
+    </auth-constraint>
+  </security-constraint>
+  <login-config>
+    <auth-method>BASIC</auth-method> 
+    <realm-name>JPhineas</realm-name> 
+  </login-config>
+  <security-role>
+    <description>A role defined for JPhineas console app.</description> 
+    <role-name>consoleadmin</role-name> 
+  </security-role>
+   -->
+	<welcome-file-list>
+		<welcome-file>index.html</welcome-file>
+	</welcome-file-list>
+</web-app>

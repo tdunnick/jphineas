@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project name="jPhineas" default="jphineas" basedir=".">
+	<property name="name" value="jPhineas" />
+	<property name="basedir" value="." />
+	<property name="src" value="${basedir}/src" />
+	<property name="test" value="${basedir}/tests" />
+	<property name="build" value="${basedir}/build/classes" />
+	<property name="tbuild" value="${basedir}/bin-groovy" />
+
+	<!-- modify the following for your build environment -->
+	<property name="tomcat" value="C:/Program Files/PhinMS/2.7.0/tomcat-5.0.19/common/lib" />
+	<property name="weblib" value="${basedir}/WebContent/WEB-INF/lib" />
+	<property name="plugins" value="C:/eclipse/plugins" />
+	<property name="junitlib" value="${plugins}/org.junit_3.8.2.v20090203-1005" />
+	<property name="groovylib" value="${plugins}/org.codehaus.groovy_1.7.5.20100926-2100-e35-RC1/lib" />
+
+	<property name="jphineasjar" value="jphineas.jar" />
+  <property name="jphineaswar" value="jphineas.war" />
+  <property name="jphineaszip" value="jphineas.zip" />
+
+	<property name="ant.build.javac.target" value="1.5" />
+  <property name="ant.build.javac.source" value="1.5" />
+	
+	<target name="jphineas">
+    <antcall target="clean" />
+		<antcall target="test" />
+		<antcall target="dist" />
+	</target>
+
+	<target name="init">
+		<!-- Create the time stamp -->
+		<tstamp/>
+		<!-- Create the build directory structure used by compile -->
+		<mkdir dir="${build}"/>
+		<mkdir dir="${tbuild}" />
+	</target>
+
+	<!-- perform any needed cleanup -->
+	<target name="clean" depends="init">
+		<delete>
+			<fileset dir="${build}" includes="**/*" />
+      <fileset dir="${tbuild}" includes="**/*" />
+		</delete>
+	</target>
+
+	<path id="javapath">
+		<fileset dir="${javalib}" includes="**/*.jar" />
+	</path>
+	
+	<!-- main compile task -->
+	<target name="compile" depends="init"
+        description="compile the source " >
+		<!-- Compile the java code from ${src} into ${build} -->
+		<javac srcdir="${src}" destdir="${build}" debug="true" >
+			<classpath>
+        <fileset dir="${tomcat}" includes="**/*.jar" />
+        <fileset dir="${weblib}" includes="**/*.jar" />
+        <pathelement location="${build}" />
+			</classpath>
+		</javac>
+	</target>
+
+	<!-- groovy support for unit testing -->
+	<path id="groovypath">
+		<fileset dir="${groovylib}" includes="**/*.jar" />
+	</path>
+
+	<taskdef name="groovyc"
+	         classname="org.codehaus.groovy.ant.Groovyc"
+	         classpathref="groovypath"/>
+
+	<target name="gcompile" depends="init">
+		<groovyc srcdir="${test}" destdir="${tbuild}">
+			<classpath>
+				<fileset dir="${tomcat}" includes="**/*.jar" />
+				<fileset dir="${junitlib}" includes="**/*.jar" />
+				<fileset dir="${groovylib}" includes="**/*.jar" />
+				<fileset dir="${weblib}" includes="**/*.jar" />
+				<pathelement location="${build}" />
+			</classpath>
+			<javac source="1.5" target="1.5" debug="on" />
+		</groovyc>
+	</target>
+
+	<!-- unit tests - note fork needed for bouncy castle loading -->
+	<target name="test" depends="compile,gcompile">
+		<junit fork="true" haltonfailure="true">
+			<classpath>
+				<fileset dir="${tomcat}" includes="**/*.jar" />
+				<fileset dir="${junitlib}" includes="**/*.jar" />
+				<fileset dir="${groovylib}" includes="**/*.jar" />
+				<fileset dir="${weblib}" includes="**/*.jar" />
+				<pathelement location="${build}" />
+				<pathelement location="${tbuild}" />
+			</classpath>
+			<formatter type="brief" usefile="false" />
+			<test name="PhineasTests" />
+		</junit>
+	</target>
+	
+	<path id="jphineas.classpath">
+	  <fileset dir="${weblib}" includes="**/*.jar" />
+	</path>
+
+	<pathconvert property="manifest.classpath" 
+		pathsep=" " refid="jphineas.classpath" >
+		<map from="${weblib}/" to="WEB-INF/lib/" />
+	</pathconvert>
+		
+	<!-- the jar -->
+	<target name="jar" >
+    <delete file="${basedir}/${jphineasjar}" failonerror="false" />
+    <jar jarfile="${basedir}/${jphineasjar}">
+      <fileset dir="${build}" 
+        excludes="/*/tmp/**,/test/**" 
+      />
+    	<!--
+    	<manifest>
+         <attribute name="Class-Path" value="${manifest.classpath}"/>
+      </manifest>
+       -->
+    </jar>
+	</target>
+	
+	<!-- the war -->
+	<target name="war" depends="jar">
+    <delete file="${basedir}/${jphineaswar}" failonerror="false" />		
+		<war warfile="${basedir}/${jphineaswar}">
+			<fileset dir="${basedir}\WebContent" excludes="**/web.xml" />
+			<zipfileset dir="${basedir}" includes="${jphineasjar}"
+			  prefix="WEB-INF/lib" />
+      <zipfileset dir="${basedir}/templates" includes="web.xml"
+        prefix="WEB-INF" />
+		</war>
+	</target>
+	
+  <!-- the distribution -->
+  <target name="dist" depends="war">
+    <delete file="${basedir}/${jphineaszip}" failonerror="false" />
+    <zip destfile="${basedir}/${jphineaszip}">
+      <fileset dir="${basedir}" 
+        includes="${jphineaswar},jphineas/**,doc/**,readme.txt"
+      />
+    </zip>
+  </target>
+</project>

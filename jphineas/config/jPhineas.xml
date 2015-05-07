@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jPhineas>
+  <!-- logging -->
+  <Log>
+    <!-- full path to log file, leave empty for stdout -->
+    <LogName/>
+    <!-- amount of detail found in log -->
+    <LogLevel>debug</LogLevel>
+    <!-- enable source locations in log -->
+    <LogLocal>true</LogLocal>
+    <!-- number of days to keep a log, leave empty for no rotation -->
+    <LogDays/>
+  </Log>
+  <!-- Default directory for file or folder references, default to configuration parent -->
+  <DefaultDirectory></DefaultDirectory>
+  <!-- our EbXML party ID -->
+  <HostId>jPhineas</HostId>
+  <!-- our host domain -->
+  <Domain/>
+  <!-- our organization name -->
+  <Organization>tdunnick.wisc.edu</Organization>
+  <!-- sender configuration -->
+  <Sender>config/Sender.xml</Sender>
+  <!-- receiver configuration -->
+  <Receiver>config/Receiver.xml</Receiver>
+  <!-- console configuration -->
+  <Console>config/Console.xml</Console>
+  <!-- queue configuration -->
+  <Queues>config/Queues.xml</Queues>
+</jPhineas>

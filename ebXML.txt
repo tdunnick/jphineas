@@ -1,0 +1,45 @@
+Most of the following is condensed from ebMS_v2_0.pdf...
+
+ebXML Message Package
+
+Multipart Mime Envelope (SOAP message with attachements)
+
+First part contains SOAP xml with Header and Body element trees
+Option following parts contain Payloads (data)
+
+The Header consists of...
+  From, To - party ID's, PHINMS uses no Roles and has eb:type="zz"
+  CPAId - usually From.To but can be anything
+  ConversationId - ID used to delineate a specific "conversation"
+  Service, Action - used by receiver for message routing/handling
+  MessageData - uniquely identifies an ebXML message
+    MessageID, Timestamp, RefToMessageId, TimeToLive elements with the latter
+    two normally absent in PHINMS
+  Duplicate Elimination, and Description elements are not used by PHINMS.
+
+The Body is empty for a Ping.  Otherwise it consists of
+  Manifest - this has one or more Reference elements. Each Reference has 
+    an xlink:href attribute identifying the Content-Id of one Mime part 
+    with a payload container (see below). 
+  MetaData - a PHINMS specific Element with DatabaseInfo
+    RecordId - server, table, and record id's separted by '.'
+    MessageId - blank?
+    Arguments - passed to handler
+    MessageRecipient - passed to handler
+
+Payloads are found in subsequent Mime parts of the message, and may consist
+of (base64) encoded data, or more commonly XML that may included encryption
+data as found in the encryption template.  The key parts of this template are
+  KeyInfo
+    KeyName - the DN for the certificate used to RSA encrypt the DES key
+    CipherValue - the triple DES key used to encrypt the payload
+  CipherData - the actual encrypted payload
+For responses this includes PHINMS specific XML with response info.
+
+
+
+
+
+gov.cdc.nedss.services.transport.message - 
+	classes used to create ebXML messages using java.xml.soap.SOAPMessage and friends
+
