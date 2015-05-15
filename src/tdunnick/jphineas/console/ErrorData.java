@@ -20,9 +20,7 @@
 package tdunnick.jphineas.console;
 
 import java.util.*;
-import java.io.*;
-
-import tdunnick.jphineas.logging.Log;
+import tdunnick.jphineas.logging.*;
 
 /**
  * Generates the error object for display to user.
@@ -34,36 +32,44 @@ public class ErrorData
 {
 	private ArrayList <String> message = new ArrayList <String> ();
 	  
-  private boolean loadErrors (String fn)
+  private boolean getLogErrors ()
   {
-  	Log.debug ("Reading " + fn);
-  	try
+  	HashMap <String, LogConfig> configs = Log.getLoggers();
+  	Iterator <String> it = configs.keySet().iterator();
+  	while (it.hasNext())
   	{
-  		BufferedReader inp = new BufferedReader (new FileReader (fn));
-  		String s;
-  		while ((s = inp.readLine()) != null)
-  		{
-  			if (s.indexOf ("ERROR") >= 0)
-  			{
-  				s = s.replace ("<", "&lt;");
-  				message.add (0, s.replace (">", "&gt;"));
-  			}
-  		}
-  		inp.close();
+  		String k = it.next();
+  		LogConfig cfg = configs.get (k);
+	  	ArrayList <String> log = cfg.getLog();
+	  	for (int i = 0; i < log.size(); i++)
+	  	{
+	  		String e = log.get(i);
+	  		if (e.contains ("ERROR"))
+	  			message.add(e);
+	  	}
   	}
-  	catch (IOException e)
-  	{
-  		Log.error ("Can't read error from " + fn + " - " + e.getMessage());
+  	if (message.size () == 0)
   		return false;
-  	}
+  	// sort by date and reverse
+  	String[] a = message.toArray(new String[0]);
+  	Arrays.sort (a);
+  	message.clear();
+  	int i = a.length;
+  	while (i-- > 0)
+  		message.add (a[i]);
   	return true;
   }
   
   public ArrayList <String> getMessage ()
   {
-  	if (message.size() == 0)
+  	if ((message.size() == 0) && !getLogErrors ())
   		message.add ("Unknown Error");
   	return message;
+  }
+  
+  public void addMessage (String m)
+  {
+  	message.add (m);
   }
   
   public void setMessage (ArrayList <String> m)

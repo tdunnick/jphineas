@@ -108,7 +108,7 @@ public class LogConfig
   	if ((logStream == System.out) || (logStream == System.err))
   		return true;
   	if (logStream != null)
-  		closeLog ();
+  		close ();
   	if (logName == null)
   		return false;
   	boolean append = false;
@@ -151,10 +151,13 @@ public class LogConfig
    * flush and close this log
    * @return true if successful
    */
-  public boolean closeLog ()
+  public boolean close ()
   {
-  	if ((logStream == System.out)|| (logStream == System.err))
+  	if ((logStream == System.out) || (logStream == System.err) || (logStream == null))
   	  return true;
+		if (logRoller != null)
+			logRoller.interrupt();
+		logRoller = null;
   	try
   	{
 	  	logStream.flush();
@@ -173,10 +176,7 @@ public class LogConfig
 	 */
 	protected void finalize() throws Throwable
 	{
-		if (logRoller != null)
-			logRoller.interrupt();
-		logRoller = null;
-		closeLog ();
+		close ();
 	}
 
 	/**

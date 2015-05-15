@@ -43,16 +43,17 @@ class LogTest extends GroovyTestCase
 	public final void testGetLogConfig()
 	{
 		assert dflt != null : "can't get default configuration"
+		assert Log.getLogConfig() == dflt : "Got back wrong configuration"
+		// println dflt.logId;
 	}
 	
-	public final void testSetLogConfigString()
+	public final void testSetLogConfig()
 	{
+		Thread t = Thread.currentThread();
+		t.setName("Bogus");
+		assert Log.setLogConfig (t, null) : "set a bogus log configuration"
+		assert Log.setLogConfig (t, dflt.logId) : "couldn't set configuration"
 	}
-	
-	public final void testSetLogConfigLogConfig()
-	{
-	}
-	
 	
 	public final void testDebug()
 	{

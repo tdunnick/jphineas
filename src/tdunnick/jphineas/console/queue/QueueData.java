@@ -21,43 +21,34 @@ package tdunnick.jphineas.console.queue;
 
 import java.util.*;
 import java.io.*;
-import tdunnick.jphineas.queue.*;
 
 /**
+ * A Java Bean used for the queue view
  * @author user
  *
  */
-public class QueueData
+public class QueueData implements Serializable
 {
 	String version = null;
-	String phinmsVersion = null;
 	ArrayList <Object[]> tables = null;	// table names
 	String table = null;					// current table
 	String constraint = null;					// table route or partyid constraint
 	ArrayList <String> fields = null;					// list of dB field names
 	ArrayList <String> rowfields = null;					// list shown in rows table
-	ArrayList rows = null;					// list of dB records
+	ArrayList <ArrayList <String>> rows = null;					// list of dB records
 	ArrayList <String> rowClass = null;			// class names for each row
 	ArrayList <String> record = null;				// selected record	
 	int recordId = 0;						// current record
 	int top, prev = 0; // record positioning
 	boolean resend = false; // record can be resent
   
-	public QueueData (String version, String phinmsVersion)
+	public QueueData ()
 	{
-		super();
-		this.version = version;
-		this.phinmsVersion = phinmsVersion;
 	}
 
 	public String getVersion ()
   {
   	return version;
-  }
-  
-  public String getPhinmsVersion ()
-  {
-  	return phinmsVersion;
   }
   
   public boolean isResend()
@@ -85,37 +76,37 @@ public class QueueData
 		return fields;
 	}
 
-	public void setFields(ArrayList fields)
+	public void setFields(ArrayList <String> fields)
 	{
 		this.fields = fields;
 	}
 
-	public ArrayList getRows()
+	public ArrayList <ArrayList <String>> getRows()
 	{
 		return rows;
 	}
 
-	public void setRows(ArrayList rows)
+	public void setRows(ArrayList <ArrayList <String>> rows)
 	{
 		this.rows = rows;
 	}
 
-	public ArrayList getRowClass()
+	public ArrayList <String> getRowClass()
 	{
 		return rowClass;
 	}
 
-	public void setRowClass (ArrayList rowClass)
+	public void setRowClass (ArrayList <String> rowClass)
 	{
 		this.rowClass = rowClass;
 	}
 	
-	public ArrayList getRecord()
+	public ArrayList <String> getRecord()
 	{
 		return record;
 	}
 
-	public void setRecord(ArrayList record)
+	public void setRecord(ArrayList <String> record)
 	{
 		this.record = record;
 	}
@@ -155,11 +146,6 @@ public class QueueData
 		this.version = version;
 	}
 
-	public void setPhinmsVersion(String phinmsVersion)
-	{
-		this.phinmsVersion = phinmsVersion;
-	}
-
 	public int getTop()
 	{
 		return top;
@@ -186,12 +172,12 @@ public class QueueData
 		return null;
 	}
 
-	public ArrayList getRowfields()
+	public ArrayList <String> getRowfields()
 	{
 		return rowfields;
 	}
 
-	public void setRowfields(ArrayList rowfields)
+	public void setRowfields(ArrayList <String> rowfields)
 	{
 		this.rowfields = rowfields;
 	}
@@ -200,8 +186,8 @@ public class QueueData
 	{
 		try
 		{
-			ArrayList r = (ArrayList) rows.get(row);
-			return (Integer.parseInt((String) r.get(0)));
+			ArrayList <String> r = rows.get(row);
+			return (Integer.parseInt(r.get(0)));
 		}
 		catch (Exception e)
 		{

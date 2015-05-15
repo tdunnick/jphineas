@@ -100,7 +100,7 @@ public class ConfigModel
   		return false;
 		}
  		x.reset (c);
-  	Log.info("Reloaded " + c.getAbsolutePath());
+  	// Log.debug("Reloaded " + c.getAbsolutePath());
   	return true;
   }
   

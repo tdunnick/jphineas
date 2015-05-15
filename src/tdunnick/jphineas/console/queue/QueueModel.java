@@ -89,16 +89,17 @@ public class QueueModel
 	}
 
 	/**
-	 * Generate the bean needed for the queue monitor view.
+	 * Generate the data needed for the queue monitor view.
 	 * 
 	 * @param request received by the monitor
-	 * @return a queue monitor bean
+	 * @return a queue monitor 
 	 */
 	public QueueData getMonitorData (HttpServletRequest request)
 	{
 		
 		setSession (request);
-		QueueData mon = new QueueData (Version, JPhineas.revision);		
+		QueueData mon = new QueueData ();	
+		mon.setVersion(Version);
 		if (setMonitor (mon, setSession (request)))
 		  return (mon);
 		return null;
@@ -115,7 +116,7 @@ public class QueueModel
 	{
 		DashBoardData dash = getDashBoardSession (request);
 		if (setDashBoard (dash, setSession (request)))
-		  return dash;
+	    return dash;
 		return null;
 	}
 	
@@ -195,7 +196,10 @@ public class QueueModel
 	{
 		DashBoardData dash = DashBoardCache.get(id);
 		if (dash == null)
-			dash = new DashBoardData(Version, JPhineas.revision);
+		{
+			dash = new DashBoardData();
+			dash.setVersion (Version);
+		}
 		return dash;
 	}
 	
@@ -258,7 +262,6 @@ public class QueueModel
 			constraintName = "FROMPARTYID";
 			dateName = "RECEIVEDTIME";
 		}
-		StringBuffer buf = new StringBuffer();
 		long interval = days * MS;
 		long start = ends - interval;
 		PhineasQ queue = manager.getQueue(table);
@@ -268,7 +271,7 @@ public class QueueModel
 			Log.debug("No rows found for date range "  + start + " to " + ends);
 			return false;
 		}
-	  ArrayList data = new ArrayList();
+	  ArrayList <String[]> data = new ArrayList <String[]> ();
 	  String constraintValue = dash.getConstraint();
 		int n = 0, min = Integer.MAX_VALUE, max = 0, total = 0;
 		interval /= 5;
@@ -354,7 +357,8 @@ public class QueueModel
 			return false;
 		PhineasQ queue = manager.getQueue(t);
 		// get the field names for this queue
-		ArrayList fieldnames = new ArrayList (Arrays.asList(queue.getType().getNames()));
+		ArrayList <String> fieldnames = 
+			new ArrayList <String> (Arrays.asList(queue.getType().getNames()));
 		// set the list of field names shown for the queue and details
 		mon.setRowfields (fieldnames);
 	  mon.setFields (fieldnames);
@@ -379,60 +383,99 @@ public class QueueModel
 	}
 	
   /**
-   * move data from a JDBC result set into a queue monitor bean
+   * move data from a JDBC result set into queue monitor bean
    * @param mon bean to update
    * @param res result set from JDBC
    * @return true if successful
    */
   private boolean setMonitorRows (QueueData mon, ArrayList <PhineasQRow> res)
   {
-		ArrayList fields = mon.getFields();
-		ArrayList rowfields = mon.getRowfields();
-	  ArrayList rows = new ArrayList ();
-	  ArrayList rowClass = new ArrayList ();
+  	// the field shown for the rows table and details - currently match
+		ArrayList <String> detailfields = mon.getFields();
+		ArrayList <String> rowfields = mon.getRowfields();
+		// the data for the rows table
+	  ArrayList <ArrayList <String>> rows = new ArrayList <ArrayList <String>> ();
+	  // the display class for each row
+	  ArrayList <String> rowClass = new ArrayList <String> ();
+	  boolean istransport = isTransport (mon.getTable());
 	  String colname = "";
 	  int n = res.size();
+	  // hack for detail field size
+	  int numfields = rowfields.size();
+	  // build the table rows noting the record ID for detail display
 	  for (int rownum = 0; rownum < n; rownum++)
 		{
+	  	String s = null;
 	  	int recordId = 0;
-	  	String status = null;
-	  	ArrayList values = new ArrayList();
-			ArrayList record = new ArrayList();
+	  	// the values for one row
+	  	ArrayList <String> values = new ArrayList <String> ();
+			// get the next row and add it to the rows
 			PhineasQRow r = res.get (rownum);
-			for (int i = 0; i < fields.size(); i++)
+			for (int i = 0; i < numfields; i++)
 			{
-				colname = (String) fields.get(i);
-				String v = r.getValue(i);;
-				record.add (v);
-				if (v != null) 
-				{
-					if ((status == null) && v.indexOf ("attempted") >= 0)
-						status = "attempted";
-					else if (v.indexOf ("fail") >= 0)
-						status = "fail";
-				}
-				for (int j = 0; j < rowfields.size(); j++)
-				{
-					if (colname.equalsIgnoreCase ((String) rowfields.get(j)))
-						values.add(v);
-				}
-				if (colname.equalsIgnoreCase("recordid"))
-				{
-					recordId = Integer.parseInt(v);
-				}
+				// get the current field and value and add it to the record
+				// NOTE this assumes rowfields line up with the data...
+				colname = rowfields.get(i);
+				String v = r.getValue(i);
+				values.add (v);
 			}
+		  // add these values to our table rows
+			rows.add (values);
+			// set the status for display class ok, queued, attempted, or failed
+			if (istransport)
+			{
+				s = r.getProcessingStatus();
+				if (s == null)
+					s = "queued";
+				if (s.equals("done"))
+				{
+					s = r.getTransportStatus();
+					if ((s == null) || !s.equals("success"))
+						s = "failed";
+					else
+					{
+						s = r.getApplicationErrorCode();
+						if ((s == null) || !s.equals ("none"))
+							s = "warning";
+						else
+						  s = "ok";
+					}
+				}
+				else if (!(s.equals ("queued") || s.equals("attempted")))
+					s = "failed";
+			}
+			else
+			{
+				s = r.getErrorMessage();
+				if ((s == null) || !s.equals ("none"))
+					s = "failed";
+				else
+					s = "ok";
+			}
+			rowClass.add (s);
+			
+			// if no record ID is set, use first one found
+			recordId = r.getRowId();
 		  if (mon.getRecordId() == 0)
-		  	mon.setRecordId(recordId);
+		  	mon.setRecordId (recordId);
+		  // if this is the selected record, set the details
 		  if (mon.getRecordId() == recordId)
 		  {
-		  	mon.setRecord(record);
-		  	if (isTransport (mon.getTable()))
-		  		mon.resend = !r.getTransportStatus().equalsIgnoreCase("success");
+		  	ArrayList <String> record = new ArrayList <String> ();
+		  	int numdetails = detailfields.size ();
+				// NOTE this assumes detailfields line up with the data...
+		  	for (int i = 0; i < numdetails; i++)
+		  	{
+		  	  record.add(r.getValue(i));
+		  	}
+		  	mon.setRecord (record);
+		  	if (istransport)
+		  	{
+		  	  s = r.getTransportStatus();
+		  		if ((s != null) && !s.equalsIgnoreCase("success"))
+		  			mon.resend = true;
+		  	}
 		  }
-			rows.add(values);
-			if (status == null)
-				status = "ok";
-			rowClass.add(status);
 		}
 	  // Log.debug("set " + rows.size() + " monitor queue rows");
 	  mon.setRows(rows);
@@ -464,7 +507,7 @@ public class QueueModel
 		{
     	String n = q.get(i);
   		PhineasQ queue = manager.getQueue(n);
-  		ArrayList r = queue.findDistinct("FROMPARTYID");
+  		ArrayList <String> r = queue.findDistinct("FROMPARTYID");
   		if (r == null)
   			r = new ArrayList <String> ();  			
 			Object[] entry = { n, r };

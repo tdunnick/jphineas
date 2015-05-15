@@ -59,6 +59,7 @@ public class QueuePoller extends Pthread
 	 */
 	public QueuePoller (XmlConfig config)
 	{
+		super ("QueuePoller");
 		pollInterval = config.getInt("PollInterval");
 		// scan folder's for send queue, get a manager, and add them to our list
 		sendQ = new ArrayList <PhineasQ> ();

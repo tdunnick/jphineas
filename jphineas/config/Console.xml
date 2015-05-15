@@ -3,6 +3,8 @@
 <Console>
   <!-- logging -->
   <Log>
+    <!-- identifies the context for this log -->
+    <LogId>Console</LogId>
     <!-- full path to log file -->
     <LogName></LogName>
     <!-- amount of detail found in log -->
@@ -99,6 +101,15 @@
       <Help>
         Settings affecting the Sender's logging.
       </Help>
+      <Input>
+        <Name>Log ID</Name>
+        <Tags>LogId</Tags>
+        <Type>text</Type>
+        <Width>44</Width>
+        <Help>
+          The ID identifies the log "context" and is included in the messages.
+        </Help>
+      </Input>
       <Input>
         <Name>Log Name</Name>
         <Tags>LogName</Tags>
@@ -517,6 +528,15 @@
         Settings affecting the receiver's logging.
       </Help>
       <Input>
+        <Name>Log ID</Name>
+        <Tags>LogId</Tags>
+        <Type>text</Type>
+        <Width>44</Width>
+        <Help>
+          The ID identifies the log "context" and is included in the messages.
+        </Help>
+      </Input>
+      <Input>
         <Name>Log Name</Name>
         <Tags>LogName</Tags>
         <Type>text</Type>
@@ -710,6 +730,7 @@
         </Input>
       </Set>
     </Tab>
+    <!-- we'll hide this for now...
     <Tab>
       <Name>Queue Types</Name>
       <Help>
@@ -744,6 +765,7 @@
         </Input>
       </Set>
     </Tab>
+     -->
     <Tab>
       <Name>Connections</Name>
       <Help>
@@ -853,6 +875,15 @@
          This describes or names the server's sponsor, company,
          group, etc.
        </Help>
+     </Input>
+       <Input>
+        <Name>Log ID</Name>
+        <Tags>LogId</Tags>
+        <Type>text</Type>
+        <Width>44</Width>
+        <Help>
+          The ID identifies the log "context" and is included in the messages.
+        </Help>
      </Input>
      <Input>
        <Name>Log Name</Name>

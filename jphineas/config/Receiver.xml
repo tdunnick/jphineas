@@ -3,6 +3,8 @@
 <Receiver>
   <!-- logging -->
   <Log>
+     <!-- identifies the context for this log -->
+    <LogId>Receiver</LogId>
     <!-- full path to log file -->
     <LogName/>
     <!-- amount of detail found in log -->

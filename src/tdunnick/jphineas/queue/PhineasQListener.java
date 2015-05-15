@@ -43,14 +43,11 @@ import tdunnick.jphineas.xml.XmlConfig;
  */
 public class PhineasQListener implements ServletContextListener
 {
-
-	@Override
 	public void contextDestroyed(ServletContextEvent ev)
 	{
 		PhineasQManager.getInstance().close();
 	}
-
-	@Override
+	
 	public void contextInitialized(ServletContextEvent ev)
 	{
 		ServletContext ctx = ev.getServletContext ();

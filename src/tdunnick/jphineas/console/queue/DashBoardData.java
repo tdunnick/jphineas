@@ -25,17 +25,16 @@ import java.io.*;
 
 
 /**
- * All the data needed by the JSP view to provide a dashboard to users.
+ * A Java Bean used by the dashboard view.
  * Note that since the dashboard has queue statics, this data is generate by
  * the queue model.
  * 
  * @author Thomas Dunnick tdunnick@wisc.edu
  *
  */
-public class DashBoardData
+public class DashBoardData implements Serializable
 {
 	String version = null;
-	String phinmsVersion = null;
 	ArrayList <Object[]> tables = null;					// table names
 	String table = null;					// current table
 	boolean isSender = true;		// true if table is a send Queue
@@ -43,28 +42,20 @@ public class DashBoardData
 	int days = 7;									// interval for statistics
 	long ends = 0;          // ending date for interval
 	String interval;				// approximate for reporting
-	ArrayList stats = null;
+	ArrayList <String[]> stats = null;
 	// reported stats
 	int max = 0,						// messages per period
 	    min = 0,
       total = 0;
 	Object[] barchart, piechart, linechart;
   
-  public DashBoardData (String version, String phinmsVersion)
+  public DashBoardData ()
 	{
-		super();
-		this.version = version;
-		this.phinmsVersion = phinmsVersion;
 	}
 
 	public String getVersion ()
   {
   	return version;
-  }
-  
-  public String getPhinmsVersion ()
-  {
-  	return phinmsVersion;
   }
   
   public ArrayList <Object[]> getTables()
@@ -143,12 +134,12 @@ public class DashBoardData
 		this.ends = ends;
 	}
 
-	public ArrayList getStats()
+	public ArrayList <String[]> getStats()
 	{
 		return stats;
 	}
 
-	public void setStats(ArrayList stats)
+	public void setStats(ArrayList <String[]> stats)
 	{
 		this.stats = stats;
 	}
@@ -186,11 +177,6 @@ public class DashBoardData
 	public void setVersion(String version)
 	{
 		this.version = version;
-	}
-
-	public void setPhinmsVersion(String phinmsVersion)
-	{
-		this.phinmsVersion = phinmsVersion;
 	}
 
 	public Object[] getBarchart()

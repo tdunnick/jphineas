@@ -84,7 +84,10 @@ public class PhineasQManager
   {
 		// if no name given we are done
   	if (name == null)
+  	{
+  		Log.error("Missing Queue configuration");
   		return (false);
+  	}
   	synchronized (lock)
   	{
 	  	XmlConfig config = new XmlConfig (); 	
@@ -125,7 +128,7 @@ public class PhineasQManager
 				// load an instance of this queue
 				try
 				{
-					Class qclass = Class.forName(c.getValue("Class"));
+					Class <?> qclass = Class.forName(c.getValue("Class"));
 					PhineasQConnection conn = (PhineasQConnection) qclass.newInstance();
 					conn.configure(c);
 					connections.put(s, conn);
@@ -133,12 +136,12 @@ public class PhineasQManager
 				catch (ClassNotFoundException e)
 				{
 					Log.error("Class '" + c.getValue("Class") + "' not found");
-					return false;
+					continue;
 				}
 				catch (Exception e)
 				{
 					Log.error("Class '" + c.getValue("Class") + "' not accessible", e);
-					return false;					
+					continue;					
 				}
 			}
 	  	// load queues

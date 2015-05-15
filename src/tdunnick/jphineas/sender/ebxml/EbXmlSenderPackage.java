@@ -138,7 +138,10 @@ public class EbXmlSenderPackage
 		{
 			path = q.getPublicKeyLdapAddress();
 			base = q.getPublicKeyLdapBaseDn();
-			dn = new StringBuffer (q.getPublicKeyLdapDn());
+			dn = new StringBuffer ();
+			String s = q.getPublicKeyLdapDn();
+			if (s != null)
+				dn.append(s);
 		}
 		if (path != null)
 		{

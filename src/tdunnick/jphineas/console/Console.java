@@ -51,7 +51,7 @@ public class Console extends HttpServlet
 {
 	private static final long serialVersionUID = 1L;
 	private static XmlConfig config = null;
-	private static String status = "stopped";
+	private static String logId = null;
 	private QueueModel mon = null;
 	private ConfigModel cfg = null;
 	private LogModel logs = null;
@@ -71,17 +71,19 @@ public class Console extends HttpServlet
 	 * 
 	 * @return true if successful
 	 */
-	private boolean initialize ()
+	private synchronized boolean  initialize ()
 	{
 		String conf = getServletContext().getInitParameter("Configuration");
 		config = new XmlConfig ();
 		if (!config.load(new File (conf)))
 		{
-			status = "failed loading " + conf;
 			return false;
 		}
-		Log.xmlLogConfig (config.copy("Log"));
-		Log.info("Console starting...");
+		Thread.currentThread().setName("Console");
+		XmlConfig console = new XmlConfig ();
+		console.load(config.getFile("Console"));
+		logId = Log.xmlLogConfig (console.copy("Log"));
+		Log.info("Configuring Console...");
 		// instantiate our queue and configuration models
 		cfg = new ConfigModel ();
 		if (!cfg.initialize (conf))
@@ -93,25 +95,26 @@ public class Console extends HttpServlet
 		if (!ping.initialize (config))
 			return false;
 		logs = new LogModel ();
+		Log.info("Console ready");
 		return true;	
 	}
 
 	/**
+	 * This only gets called once!
 	 * @see Servlet#init(ServletConfig)
 	 */
 	public void init() throws ServletException
 	{
-		Thread.currentThread().setName("Console");
 		// logger.fine ("Configuration file=" + configFile);
 		if (!initialize())
 		{
 			throw (new ServletException ("Fatal error: error initializing jPhineas Console"));
 		}
-		status = "ready";
 		Log.info ("jPhineas Console Ready");
 	}
 
 	/**
+	 * This gets called for each thread
 	 * @see Servlet#destroy()
 	 */
 	public void destroy()
@@ -141,11 +144,13 @@ public class Console extends HttpServlet
 	{
 		String s = request.getRequestURI();
 		String f = null;
-		Thread.currentThread().setName("Console");
 
+		Thread.currentThread().setName("Console");
+		Log.setLogConfig (Thread.currentThread(), logId);
 		Log.debug ("request path=" + s);
 		Object o = null;
 		
+		// any PNG graphic request gets forwarded to our queue model
 		if (s.contains (".png"))
 		{
 			byte[] img = mon.getChart(s);
@@ -160,12 +165,16 @@ public class Console extends HttpServlet
 				return;
 			}
 		}
-		
+		// if this is a restart, do it and refresh last page
 		if (s.contains ("restart.html"))
 		{
+			Log.debug("Shutting down services");
 			Receiver.shutdown();
 			Sender.shutdown();
+			// Log.close ();
+			Log.debug("Restarting Queue Manager");
 			PhineasQManager.getInstance().restart ();
+			Log.debug("Restarting services");
 			Sender.startup();
 			Receiver.startup();
 			initialize ();
@@ -177,6 +186,7 @@ public class Console extends HttpServlet
 			}
 		}
 
+		// now reply based on the URL
 		if (s.contains ("dashboard.html"))
 		{
 			if ((o = mon.getDashBoardData (request)) != null)
@@ -219,7 +229,7 @@ public class Console extends HttpServlet
 				f = "/views/ping.jsp";
 			}
 		}
-		else if (s.contains("error") || (f == null))
+		if (s.contains("error") || (f == null))
 		{
 			request.setAttribute("error", new ErrorData ());
 			f = "/views/error.jsp";

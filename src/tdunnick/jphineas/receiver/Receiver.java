@@ -49,19 +49,22 @@ public class Receiver extends HttpServlet
 	 * identifiers found in our XML configuration file - note this follows
 	 * receiver.xml conventions, with our own additions.
 	 */
-	// servlets properties
+	/** properties */
 	private static String configName = null;
 	
-	// current status
+	/** log ID */
+	private static String logId = null;
+	
+	/** current status */
 	private static String status = "stopped";
 	
-	// location of CPA's
+	/** location of CPA's */
 	private static String cpadir = null;
 	
-	// reply cache
+	/** reply cache */
 	private static ReplyCache replies = null;
 	
-	// our stats
+	/** our stats */
 	String[] heading = 
 	  { "Date/Time", "File Name", "Status", "Error", "Response" };
 	
@@ -76,10 +79,11 @@ public class Receiver extends HttpServlet
 	 * 
 	 * @return true if successful
 	 */
-	public static boolean startup ()
+	public static synchronized boolean startup ()
 	{
 		if (configName == null)
 			return false;
+		Thread.currentThread().setName("Receiver");
 		final String servicePrefix = "ServiceInfo.Service";
 		
 		// add bouncy castle to the security providers for missing algorithms
@@ -102,7 +106,7 @@ public class Receiver extends HttpServlet
 		config.setValue("HostId", master.getValue ("HostId"));
 		config.setValue("Domain", master.getValue ("Domain"));
 		config.setValue("Organization", master.getValue ("Organization"));
-		Log.xmlLogConfig (config.copy("Log"));
+		logId = Log.xmlLogConfig (config.copy("Log"));
 		Log.info("Receiver starting...");
 		// CPA folder and reply cache
 		cpadir = config.getDirectory("CpaDirectory");
@@ -193,6 +197,8 @@ public class Receiver extends HttpServlet
 	protected void doPost(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException
 	{
+		Thread.currentThread().setName("Receiver");
+		Log.setLogConfig(Thread.currentThread(), logId);
 		Log.info("********************** Begin message "
 				+ " processing **********************");
 		// process the request
@@ -318,12 +324,11 @@ public class Receiver extends HttpServlet
 	public void init() throws ServletException
 	{
 	  configName = getServletContext().getInitParameter("Configuration");
-		Thread.currentThread().setName("Receiver");
 		if (!startup ())
 		{
 			throw (new ServletException ("Fatal error: error initializing jPhineas Receiver"));
 		}
 		status = "ready";
-		Log.info ("jPhineas Sender Ready");
+		Log.info ("jPhineas Receiver Ready");
 	}
 }

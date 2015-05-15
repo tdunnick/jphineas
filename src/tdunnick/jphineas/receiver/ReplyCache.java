@@ -25,22 +25,24 @@ public class ReplyCache extends Cache
 	 * initializes a reply cache, removing and left overs and create cache
 	 * directory as needed
 	 * 
-	 * @param cacheDir directory where replies are cached
+	 * @param cache directory where replies are cached
 	 */
-	public ReplyCache (File cacheDir)
+	public ReplyCache (File cache)
 	{
-		if (cacheDir == null)
-			cacheDir = new File (System.getProperty("java.io.tmpdir") + "/jphineas/");
-		this.cacheDir = cacheDir;
-		if (!cacheDir.isAbsolute())
-			cacheDir.mkdirs ();
-		File[] list = cacheDir.listFiles();
-		if (list != null)
+		if (cache == null)
+			cache = new File (System.getProperty("java.io.tmpdir") + "/jphineas/");
+		if (!cache.exists())
+			cache.mkdirs ();
+		File[] list = cache.listFiles();
+		if (list == null)
 		{
-			for (int i = 0; i < list.length; i++)
-				list[i].delete ();
+			Log.error(cache.getPath() + "is not a valid response cache directory");
+			return;
 		}
-		Log.info("Initialized reply cache at " + cacheDir.getAbsolutePath());
+		for (int i = 0; i < list.length; i++)
+			list[i].delete ();
+		Log.info("Initialized reply cache at " + cache.getAbsolutePath());
+		cacheDir = cache;
 	}
 	
 	/**
@@ -88,6 +90,8 @@ public class ReplyCache extends Cache
 	 */
 	public void put (SoapXml soap, MimeContent data)
 	{
+		if (cacheDir == null)
+			return;
 		String key = getKey (soap);
 		// if already cached we are done
 		if (super.get(key) != null)
@@ -102,7 +106,8 @@ public class ReplyCache extends Cache
 		}
 		catch (IOException e)
 		{
-			Log.error("Failed writing " + fn.getAbsolutePath() + " to reply cache");
+			Log.error("Failed writing " + fn.getAbsolutePath() 
+					+ " to reply cache - " + e.getMessage());
 			return;
 		}
 	}

@@ -50,7 +50,7 @@ public class Charts
 	 */
 	public void getBarChart (DashBoardData dash)
 	{
-		ArrayList r = dash.getStats();
+		ArrayList <String[]> r = dash.getStats();
 		if (r == null)
 			return;
 		long ends = dash.getEnds();
@@ -68,16 +68,16 @@ public class Charts
 	 * @param days covered by list
 	 * @return bar chart data
 	 */
-	private CategoryDataset createBarChartDataset (ArrayList r, long ends, long days)
+	private CategoryDataset createBarChartDataset (ArrayList <String[]> r, long ends, long days)
 	{
-		ArrayList constraints = new ArrayList();
+		ArrayList <String> constraints = new ArrayList <String> ();
 		DefaultCategoryDataset dataset = new DefaultCategoryDataset();
 
 		// first time through just collect the constraint names
 		for (int i = 0; i < r.size(); i++)
 		{
-			String[] item = (String[]) r.get(i);
-			String k = (String) item[0];
+			String[] item = r.get(i);
+			String k = item[0];
 			if (!constraints.contains(k))
 				constraints.add(k);
 		}
@@ -89,8 +89,8 @@ public class Charts
 			counts[i] = 0;
 		for (int i = 0; i < r.size(); i++)
 		{
-			String[] item = (String[]) r.get(i);
-			long d = Long.parseLong(item[1]);
+			String[] item = r.get(i);
+			long d = Long.parseLong (item[1]);
 			if (d > start)
 			{
 				addBarData (dataset, constraints, start, counts);
@@ -113,14 +113,14 @@ public class Charts
 	 * @param d time (date) for that interval
 	 * @param values for each constraint
 	 */
-	private void addBarData (DefaultCategoryDataset data, ArrayList constraints, 
+	private void addBarData (DefaultCategoryDataset data, ArrayList <String> constraints, 
 			long d, int[] values)
 	{
 		SimpleDateFormat f = new SimpleDateFormat("MMM-yy");
 		String date = f.format (new Date(d));
 		for (int i = 0; i < values.length; i++)
 		{
-			data.addValue(values[i], (String) constraints.get(i), date);
+			data.addValue(values[i], constraints.get(i), date);
 			values[i] = 0;
 		}
 	}
@@ -158,7 +158,7 @@ public class Charts
   
 	public void getLineChart (DashBoardData dash)
 	{
-		ArrayList r = dash.getStats();
+		ArrayList <String[]> r = dash.getStats();
 		if (r == null)
 			return;
 		long ends = dash.getEnds();
@@ -184,10 +184,10 @@ public class Charts
     dash.setLinechart(getJFreeObject (chart, "line", 300, 250));
 	}
 
-	private XYSeriesCollection createLineChartDataset (ArrayList r, 
+	private XYSeriesCollection createLineChartDataset (ArrayList <String[]> r, 
 			long ends, long days)
 	{
-		ArrayList constraints = new ArrayList();
+		ArrayList <String> constraints = new ArrayList <String> ();
 		XYSeriesCollection dataset = new XYSeriesCollection();
 
 		// first time through just collect the constraint names
@@ -287,9 +287,9 @@ public class Charts
 
 	public void getPieChart (DashBoardData dash)
 	{
-		ArrayList r = dash.getStats();
-		ArrayList categories = new ArrayList();
-		HashMap counts = new HashMap ();
+		ArrayList <String[]> r = dash.getStats();
+		ArrayList <String> categories = new ArrayList <String>( );
+		HashMap <String, String> counts = new HashMap <String, String> ();
 		
 		if (r == null)
 		{
@@ -299,7 +299,7 @@ public class Charts
 		// count entries for each category
 		for (int i = 0; i < r.size(); i++)
 		{
-			String[] item = (String[]) r.get(i);
+			String[] item = r.get(i);
 			if (item == null)
 			{
 				Log.error("Null category from dashboard statistics");
@@ -313,7 +313,7 @@ public class Charts
 				return;
 			}
 			if (counts.containsKey(k))
-				v = Integer.parseInt((String) counts.get(k));
+				v = Integer.parseInt(counts.get(k));
 			else
 				categories.add(k);
 			counts.put(k, Integer.toString(v+1));
@@ -322,7 +322,7 @@ public class Charts
 		for (int i = 0; i < categories.size(); i++)
     {
 			String k = categories.get(i).toString();
-    	dataset.setValue(k,Integer.parseInt(counts.get(k).toString()));
+    	dataset.setValue(k,Integer.parseInt(counts.get(k)));
     }
     JFreeChart chart = createPieChart("Summary", dataset);
     dash.setPiechart(getJFreeObject (chart, "pie", 200, 175));

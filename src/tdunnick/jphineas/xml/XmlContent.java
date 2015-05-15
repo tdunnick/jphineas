@@ -20,7 +20,7 @@
 package tdunnick.jphineas.xml;
 
 import java.io.*;
-
+import java.util.*;
 import org.w3c.dom.*;
 import javax.xml.parsers.*;
 import javax.xml.transform.*; 
@@ -493,6 +493,36 @@ public class XmlContent
   public int getInt (String names)
   {
   	return getInt (names, 0);
+  }
+  
+  /**
+   * Get a list of all the child names and values for this name
+   * @param name of node with values
+   * @return
+   */
+  public String[][] getChildren (String name)
+  {
+  	HashMap <String, Integer> names = new HashMap <String, Integer> ();
+  	ArrayList <String[]> values = new ArrayList <String[]> ();
+  	Node node = getElement (name);
+  	if (node != null)
+  		node = node.getFirstChild();
+  	while (node != null)
+  	{
+  		if (node.getNodeType() == Node.ELEMENT_NODE)
+  		{
+  			String n = node.getNodeName ();
+  			int i = 0;
+  			if (names.containsKey(n))
+  			  i = names.get(n).intValue() + 1;
+  			names.put(n, new Integer (i));
+  			if (i > 0) n += "[" + i + "]";
+	  		String[] v = { n, getNodeValue (node)};
+	  		values.add (v);
+  		}
+  		node = node.getNextSibling();
+  	}
+  	return values.toArray(new String[0][]);
   }
   
   /**

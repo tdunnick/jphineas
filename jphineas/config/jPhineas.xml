@@ -2,6 +2,8 @@
 <jPhineas>
   <!-- logging -->
   <Log>
+    <!-- identifies the context for this log -->
+    <LogId>jPhineas</LogId>
     <!-- full path to log file, leave empty for stdout -->
     <LogName/>
     <!-- amount of detail found in log -->

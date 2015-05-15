@@ -46,13 +46,15 @@ public class Sender extends HttpServlet
 	 * identifiers found in our XML configuration file - note this follows
 	 * receiver.xml conventions, with our own additions.
 	 */
-	// servlet configuration
+	/** servlet configuration */
 	private static String configName = null;
-	// folder poller
+	/** log id */
+	private static String logId = null;
+	/** folder poller */
 	private static FolderPoller folderPoller = null;
-	// a queue poller
+	/** a queue poller */
 	private static QueuePoller queuePoller = null;
-	// the queue manager
+	/** the queue manager */
 	private static PhineasQManager manager = PhineasQManager.getInstance();
 	
 	/**
@@ -60,9 +62,10 @@ public class Sender extends HttpServlet
 	 * 
 	 * @return true if successful
 	 */
-	public static boolean startup ()
+	public static synchronized boolean startup ()
 	{
 		String s = null;
+		Thread.currentThread().setName("Sender");
 		if (configName == null)
 		{
 			Log.error ("startup with no configuration");
@@ -92,7 +95,7 @@ public class Sender extends HttpServlet
 		config.setValue("Domain", master.getValue ("Domain"));
 		config.setValue("Organization", master.getValue ("Organization"));
 		// configure logging
-		Log.xmlLogConfig(config.copy("Log"));
+		logId = Log.xmlLogConfig(config.copy("Log"));
 		Log.info("Starting sender servlet...");
 		if (config.getValue("Domain") == null)
 		{
@@ -128,11 +131,9 @@ public class Sender extends HttpServlet
 		}
 		// start the folder poller
 		folderPoller = new FolderPoller (config);
-		folderPoller.setName ("FolderPoller");
 		folderPoller.start();
 		// start the queue poller
 		queuePoller = new QueuePoller (config);
-		queuePoller.setName("QueuePoller");
 		queuePoller.start ();
 		status = "running";
 		return (true);
@@ -167,17 +168,6 @@ public class Sender extends HttpServlet
 			throws ServletException, IOException
 	{
 		String msg = JPhineas.getHtml () + "<p>Sender " + status + "</p>";
-		/*
-		 * for debugging purposes, check for a Ping request
-		String route = req.getParameter("Ping");
-		if (route != null)
-		{
-			if (EbXmlQueue.addPing (manager.getQueue("HsqlSendQ"), route))
-				msg += "<ul>Ping " + route + " queued to HsqlSendQ";
-			else
-				msg += "<ul>Ping " + route + " to HsqlSendQ failed";
-		}
-		 */
 		msg = "<html><body>" + msg + "</body></html>";
 		resp.getOutputStream().write (msg.getBytes());
 	}
@@ -209,7 +199,6 @@ public class Sender extends HttpServlet
 	 */
 	public void init() throws ServletException
 	{
-		Thread.currentThread().setName("Sender");
 	  configName = getServletContext().getInitParameter("Configuration");
 		// Log.fine ("Configuration file=" + configFile);
 		if (!startup())

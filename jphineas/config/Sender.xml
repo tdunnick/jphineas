@@ -3,6 +3,8 @@
 <Sender>
   <!-- logging -->
   <Log>
+    <!-- identifies the context for this log -->
+    <LogId>Sender</LogId>
     <!-- full path to log file -->
     <LogName/>
     <!-- amount of detail found in log -->
@@ -75,8 +77,8 @@
       <Arguments/>
       <Recipient/>
       <Encryption>
-        <!--  none, cert, ldap, pbe  -->
-        <Type>cert</Type>
+        <!--  none, certificate, ldap, pbe  -->
+        <Type>certificate</Type>
         <Id/>
         <Password/>
         <Unc>security/sslcert.pem</Unc>

@@ -29,15 +29,6 @@
     href="${pageContext.request.contextPath}/css/jphineas.css" />
   <dec:head />
   <script type="text/javascript">
-  function askRestart ()
-  {
-    if (confirm ("Restart jPHINEAS?"))
-    {
-      deleteCookie (null);
-      window.location = "${pageContext.request.contextPath}/console/restart.html";
-      window.location.reload (true);
-    }
-  }
   function deleteCookie(cname) // delete a cookie
   {
     var cookies = document.cookie.split(";");
@@ -121,7 +112,8 @@
             </td>
             -->
             <td>
-              <a href="javascript:askRestart();">
+              <a href="${pageContext.request.contextPath}/console/restart.html"
+              onClick="confirm ('Restart jPhineas');">
               <img alt="restart" src="${pageContext.request.contextPath}/images/start.gif" id="restart"></a>
             </td>
              <td>

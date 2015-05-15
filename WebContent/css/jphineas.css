@@ -85,15 +85,28 @@ div.records th {
 	color: #0000aa;
 	background-color: #ddffff;
 }
+/* greenish */
 div.records tr.ok {
 	background-color: #ddffdd;
 }
-div.records tr.fail {
+/* reddish */
+div.records tr.failed {
 	background-color: #ff8888;
 }
-div.records tr.attempted {
-	background-color: #eeeeee;
+/* yellowish */
+div.records tr.warning {
+  background-color: #ffff99;
 }
+/* blueish and blinking */
+div.records tr.attempted {
+	background-color: #ccffff;
+	text-decoration: blink;
+}
+/* greyish */
+div.records tr.queued {
+  background-color: #eeeeee;
+}
+
 div.records td {
 	white-space: nowrap;
 	font-size:10px;

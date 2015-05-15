@@ -102,6 +102,22 @@ public class PhineasQType
 	}
 	
 	/**
+	 * Get a list of ID's ordered by their index
+	 * @return
+	 */
+	public String[] getIds ()
+	{
+		Iterator <String> it = idMap.keySet().iterator();
+		String[] ids = new String [idMap.size()];
+		while (it.hasNext())
+		{
+			String k = it.next ();
+			ids[idMap.get(k).intValue()] = k;
+		}
+		return ids;
+	}
+	
+	/**
 	 * Get the value index for a given field id
 	 * @param n name to use
 	 * @return index to value or -1 if not found

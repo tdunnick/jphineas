@@ -89,7 +89,7 @@ table.navhelp td { vertical-align:top; }
       configuration files. Use a zip editor to modify
       <b>WEB-INF/web.xml</b> in <b>jphineas.war</b> (I like
       <b>7Zip</b>). Change the <b>&lt;param-value&gt;</b> of the
-      <b>&lt:context-param&gt;</b> from
+      <b>&lt;context-param&gt;</b> from
       /jphineas/config/jPhineas.xml to include the full paths to
       the <b>jphineas/config</b> folder. For example, if you
       unpacked the zip to <b>C:\usr</b> then...
@@ -222,11 +222,13 @@ table.navhelp td { vertical-align:top; }
           be noted. Once a button is clicked on any tab, or you
           navigate away from the Configure page, any other
           changes will be lost.
+          </p>
 					<p>
 					The <b>Save/Revert</b> tab allows you to save the current
 					configuration, or revert the current configuration to a previously
 					saved version.  However, changes do not take effect until
 					a <b>Restart</b> (see below).
+					</p>
           <br><br>
           <img src="images/help/save.gif" alt="save configuration">
         </td>
@@ -449,6 +451,7 @@ for updates to take effect.
       You will normally not need to change any of the <b>General Settings</b>
 			or <b>Logging</b>. However there are two key configurations needed to 
 			send a file (payload): 
+		</p>
 			<ol>
 			  <li>Route - this describes the internet connection that
 				will be made to a specific destination.  It is typically
@@ -474,7 +477,6 @@ for updates to take effect.
 				</p> 
 				</li>
 			</ol>
-    </p>
     <h2>
       <a name="Receiver" id="Receiver">Receiver Configuration</a>
     </h2>
@@ -490,6 +492,7 @@ for updates to take effect.
 			convienient.  Likewise, each service can have its own unique
 			decryption parameters.  That allows you to optionally provide 
 			senders separate encryhption keys	for each service.
+			</p>
     <h2>
       <a name="Queues" id="Queues">Queue Configuration</a>
     </h2>

@@ -49,6 +49,7 @@ public class QueueThread extends Pthread
 	 */
 	public QueueThread (PriorityBlockingQ q, HashMap <String,RouteInfo> r)
 	{
+		super ("QueueThread");
 		queue = q;
 		routes = r;
 	}

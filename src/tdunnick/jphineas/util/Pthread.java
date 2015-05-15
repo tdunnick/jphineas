@@ -10,6 +10,17 @@ import tdunnick.jphineas.logging.Log;
  */
 public class Pthread extends Thread
 {
+	/**
+	 * all Pthreads get names and default log configuration inherited from parent
+	 * @param name
+	 */
+	public Pthread (String name)
+	{
+		super();
+		this.setName(name);
+		Log.setLogConfig (this, null);
+	}
+	
   /**
    * @return true if thread is stopped
    */

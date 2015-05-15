@@ -26,15 +26,15 @@
 <html>
 <head>
   <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
-  <title>PhinmsX Error</title>
+  <title>jPhineas Error</title>
 </head>
 <body>
-<content tag="pagetitle">PhinmsX Error</content>
+<content tag="pagetitle">jPhineas Error</content>
 An error has occurred that prevents access to this page.  Please correct
-and restart <b>PhinmsX</b>.
+and restart <b>jPhineas</b>.
 <div style="border: solid grey 1px; margin: 10px 0 10px 0; padding: 5px 5px 5px 5px;">
   <c:forEach items="${e.message}" var="m" >
-    <p></p><c:out value="${m}" /></p>
+    <p><c:out value="${m}" /></p>
   </c:forEach>
 </div>
 </body>

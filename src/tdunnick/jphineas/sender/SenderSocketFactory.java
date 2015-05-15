@@ -143,7 +143,8 @@ public class SenderSocketFactory
 		 }
 		 catch (Exception e)
 		 {
-			 e.printStackTrace();
+			 Log.error("Unable to connect to " + protocol + "://" + host + ":" + port
+					 + " - " + e.getMessage());
 			 return null;
 		 }	 		 
 	 }

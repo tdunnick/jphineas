@@ -28,16 +28,25 @@ import tdunnick.jphineas.xml.*;
 
 /**
  * A logging configuration for jPhineas. Yeah, log4j is really nice, 
- * but this gives us our own embedded control and automatic config selection 
- * by thread name.
+ * but this gives us our own embedded control.  The desired behavior is
+ * to provide specific configurations by ID from either servlets or optionally
+ * worker threads.  Otherwise threads inherit configurations from their parents.
+ * 
+ * Log configurations are mapped by their ID.  As a hack, they are also mapped
+ * by thread (name).  When a log is configured, the configuring thread is noted. When a 
+ * logging request is made, the appropriate configuration is selected by thread.
+ * If this is the first time for that thread, it defaults to the last configuration
+ * made.  Note that multiple thread may answer to the same name!
  * 
  * @author Thomas L Dunnick
  *
  */
 public class Log
 {
-	/** logger configurations */
+	/** logger configurations - mapped by Log ID */
 	private static HashMap <String,LogConfig> loggers = new HashMap<String, LogConfig>();
+	/** logger configurations - mapped by Thread Name */
+	private static HashMap <String,LogConfig> threadmap = new HashMap <String, LogConfig>();
 	/** last configuration used */
 	private static LogConfig config = new LogConfig();
 	
@@ -48,7 +57,7 @@ public class Log
   {
   }
     
-	/**
+ 	/**
 	 * gets the log configuration for the current thread. 
 	 * If none exists use the last one set.
 	 * 
@@ -56,40 +65,63 @@ public class Log
 	 */
 	public static LogConfig getLogConfig() 
 	{
-		String s = getThreadName(false);
+		String s = Thread.currentThread().getName();
 		// System.err.println (s + " log configuration");
-		if (loggers.containsKey(s))
-			return loggers.get(s);
+		if (threadmap.containsKey(s))
+			return threadmap.get(s);
 		// new thread defaults to last configuration set or added
-		setLogConfig (config);
+		setLogConfig (Thread.currentThread(), config.getLogId());
 		return config;
 	}
   
-  /**
-   * sets a logging configuration for this thread
-   * 
-   * @param cfg to add
-   */
-  public static void setLogConfig (LogConfig cfg)
-  {
-  	// if (cfg.rollLog())
-  	  loggers.put(getThreadName(false), config = cfg);
-  }
+	/**
+	 * force the configuration for a thread - user current configuration if
+	 * no ID is given.
+	 * 
+	 * @param id of configuration to force
+	 * @return true if successful
+	 */
+	public static boolean setLogConfig (Thread t, String id)
+	{
+		if (id != null)
+		{
+		  LogConfig cfg = loggers.get (id);
+			if (cfg == null)
+			{
+				// if not our default, this is a boo boo
+				if (!id.equals (config.getLogId()))				
+				  return false;
+				// otherwise add it to the map
+				loggers.put(id, config);
+			}
+			else
+				config = cfg;
+		}
+		threadmap.put(t.getName(), config);
+		return true;
+	}
   
   /**
-   * Add a logging configuration using xml configuration
+   * Add a logging configuration using xml configuration.  Note this will
+   * replace an existing configuration with the same ID.
    * 
    * @param props xml
+   * @return the log ID
    */
-  public static void xmlLogConfig (XmlConfig props)
+  public static String xmlLogConfig (XmlConfig props)
   {
 		LogConfig cfg = new LogConfig ();
-		cfg.setLogId(Thread.currentThread().getName());
+		String id = props.getValue("LogId");
+		if (id == null)
+			id = Thread.currentThread().getName();
+		cfg.setLogId(id);
  		cfg.setLogName(props.getValue("LogName"));
 	  cfg.setLogLevel(props.getValue("LogLevel"));
 	  cfg.setLogDays(props.getValue("LogDays"));
 	  cfg.setLogLocal(props.getValue("LogLocal"));
-	  setLogConfig (cfg);
+ 	  loggers.put(cfg.getLogId(), config = cfg);
+ 	  threadmap.put(Thread.currentThread().getName(), cfg);
+	  return id;
   }
 
   /**
@@ -116,19 +148,6 @@ public class Log
   }
   
   /**
-   * get the thread name for logging purposes
-   * @return the thread name
-   */
-  private static String getThreadName (boolean logging)
-  {
-  	Thread t = Thread.currentThread();
-  	String s = t.getName();
-  	if (logging)
-  		s += "[" + t.getId() + "]";
-  	return s;
-  }
-  
-  /**
    * The general logging function.  Only log for requested levels and include
    * locations if requested.
    * 
@@ -144,8 +163,10 @@ public class Log
   		return;
   	SimpleDateFormat fmt = new SimpleDateFormat ("yyyy-MM-dd HH:mm:ss ");
   	StringBuffer buf = new StringBuffer (fmt.format (new Date()));
-  	buf.append(getThreadName(true));
-  	buf.append(" ");
+  	String n = Thread.currentThread().getName();
+  	if ((n == null) || (n.length() == 0))
+  		n = cfg.getLogId();
+  	buf.append(n + "[" + Thread.currentThread().getId() + "] ");
   	switch (level)
 		{
 			case LogConfig.DEBUG:
@@ -168,6 +189,24 @@ public class Log
   	cfg.log (buf.toString());
   }
 
+  /**
+   * close current logs and reset logging
+   */
+  public static void close ()
+  {
+  	Iterator <String> it = loggers.keySet().iterator();
+  	config = null;
+  	while (it.hasNext ())
+  	{
+  		String k = it.next();
+  		LogConfig cfg = loggers.get(k);
+  		cfg.close();
+  	}
+  	loggers.clear();
+  	threadmap.clear();
+  	config = new LogConfig();
+  }
+  
   /**
    * get a list of loggers
    * @return the loggers

@@ -58,6 +58,7 @@ public class FolderPoller extends Pthread
    */
   public FolderPoller (XmlConfig config)
   {
+  	super ("FolderPoller");
   	// how often we check...
   	pollInterval = config.getInt("PollInterval");
   	folders = new ArrayList <FolderInfo> ();

@@ -166,6 +166,18 @@ class XmlContentTest extends GroovyTestCase
 		assert xmlc.getAttribute (tag, "id2").length() == 0 : "returned invalid attribute"
 	}
 	
+	public final void testGetChildren ()
+	{
+		String[][] children = xmlc.getChildren ("EncryptedData.KeyInfo.EncryptedKey");
+		assert children != null : "found no children"
+		assert children.length == 3 : "expected 3 children but got " + children.length
+		String[][] names = [ ["EncryptionMethod", ""], ["KeyInfo", ""], ["CipherData", ""] ]
+		for (int i = 0; i < children.length; i++)
+		{
+			assert children[i][0].equals(names[i][0]) : "names don't match"
+			assert children[i][1].equals(names[i][1]) : "values don't match"
+		}
+	}
 	public final void testNS ()
 	{
 		String xname = "examples/soap_defaults.xml"
