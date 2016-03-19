@@ -23,6 +23,7 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.io.*;
 
+import tdunnick.jphineas.config.LogConfig;
 import tdunnick.jphineas.xml.*;
 
 
@@ -44,11 +45,11 @@ import tdunnick.jphineas.xml.*;
 public class Log
 {
 	/** logger configurations - mapped by Log ID */
-	private static HashMap <String,LogConfig> loggers = new HashMap<String, LogConfig>();
+	private static HashMap <String,LogContext> loggers = new HashMap<String, LogContext>();
 	/** logger configurations - mapped by Thread Name */
-	private static HashMap <String,LogConfig> threadmap = new HashMap <String, LogConfig>();
+	private static HashMap <String,LogContext> threadmap = new HashMap <String, LogContext>();
 	/** last configuration used */
-	private static LogConfig config = new LogConfig();
+	private static LogContext config = new LogContext();
 	
   /**
    * This is a singleton shared by all classes
@@ -63,7 +64,7 @@ public class Log
 	 * 
 	 * @return the configuration
 	 */
-	public static LogConfig getLogConfig() 
+	public static LogContext getLogConfig() 
 	{
 		String s = Thread.currentThread().getName();
 		// System.err.println (s + " log configuration");
@@ -85,7 +86,7 @@ public class Log
 	{
 		if (id != null)
 		{
-		  LogConfig cfg = loggers.get (id);
+		  LogContext cfg = loggers.get (id);
 			if (cfg == null)
 			{
 				// if not our default, this is a boo boo
@@ -108,19 +109,27 @@ public class Log
    * @param props xml
    * @return the log ID
    */
-  public static String xmlLogConfig (XmlConfig props)
+  public static String configure (LogConfig props)
   {
-		LogConfig cfg = new LogConfig ();
-		String id = props.getValue("LogId");
+  	if (props == null)
+  		return getLogConfig().getLogId();
+		LogContext cfg = null;
+		String id = props.getLogId();
 		if (id == null)
 			id = Thread.currentThread().getName();
-		cfg.setLogId(id);
- 		cfg.setLogName(props.getValue("LogName"));
-	  cfg.setLogLevel(props.getValue("LogLevel"));
-	  cfg.setLogDays(props.getValue("LogDays"));
-	  cfg.setLogLocal(props.getValue("LogLocal"));
- 	  loggers.put(cfg.getLogId(), config = cfg);
- 	  threadmap.put(Thread.currentThread().getName(), cfg);
+		if ((cfg = loggers.get(id)) == null)
+		{
+	  	// System.out.println("*** Creating context for " + id);
+	  	cfg = new LogContext ();
+			cfg.setLogId(id);
+	 	  loggers.put(id, cfg);
+		}
+		// System.out.println ("*** Updating context for " + id);
+ 		cfg.setLogName(props.getLogName());
+	  cfg.setLogLevel(props.getLogLevel());
+	  cfg.setLogDays(props.getLogDays());
+	  cfg.setLogLocal(props.getLogLocal());
+ 	  threadmap.put(Thread.currentThread().getName(), config = cfg);
 	  return id;
   }
 
@@ -139,7 +148,7 @@ public class Log
 		for (int i = 2; i < stack.length; i++)
 		{
 			String n = stack[i].getClassName();
-			if (n.equals (ignore))
+			if (n.startsWith (ignore))
 				continue;
 		  n += "." + stack[i].getMethodName();
 			return n + "() " + stack[i].getLineNumber();
@@ -156,9 +165,9 @@ public class Log
    */
   private static void log (int level, String m)
   {
-  	LogConfig cfg = getLogConfig ();
+  	LogContext cfg = getLogConfig ();
   	if ((cfg.getLogLevel() < level) ||  
-  			(cfg.getLogLevel() == LogConfig.OFF) ||
+  			(cfg.getLogLevel() == LogContext.OFF) ||
   			(cfg.getLogStream() == null))
   		return;
   	SimpleDateFormat fmt = new SimpleDateFormat ("yyyy-MM-dd HH:mm:ss ");
@@ -169,16 +178,16 @@ public class Log
   	buf.append(n + "[" + Thread.currentThread().getId() + "] ");
   	switch (level)
 		{
-			case LogConfig.DEBUG:
+			case LogContext.DEBUG:
 				buf.append("DEBUG: ");
 				break;
-			case LogConfig.ERROR:
+			case LogContext.ERROR:
 				buf.append("ERROR: ");
 				break;
-			case LogConfig.INFO:
+			case LogContext.INFO:
 				buf.append("INFO: ");
 				break;
-			case LogConfig.WARN:
+			case LogContext.WARN:
 				buf.append("WARN: ");
 				break;
 		}
@@ -199,19 +208,19 @@ public class Log
   	while (it.hasNext ())
   	{
   		String k = it.next();
-  		LogConfig cfg = loggers.get(k);
+  		LogContext cfg = loggers.get(k);
   		cfg.close();
   	}
   	loggers.clear();
   	threadmap.clear();
-  	config = new LogConfig();
+  	config = new LogContext();
   }
   
   /**
    * get a list of loggers
    * @return the loggers
    */
-  public static HashMap <String, LogConfig> getLoggers ()
+  public static HashMap <String, LogContext> getLoggers ()
   {
   	return loggers;
   }
@@ -223,7 +232,7 @@ public class Log
    */
   public static void info (String m)
   {
-  	log (LogConfig.INFO, m);
+  	log (LogContext.INFO, m);
   }
   
   /**
@@ -233,7 +242,7 @@ public class Log
    */
   public static void warn (String m)
   {
-  	log (LogConfig.WARN, m);
+  	log (LogContext.WARN, m);
   }
   
  /**
@@ -243,7 +252,7 @@ public class Log
   */
   public static void error (String m)
   {
-  	log (LogConfig.ERROR, m);
+  	log (LogContext.ERROR, m);
   }
   
   /**
@@ -280,6 +289,6 @@ public class Log
    */
   public static void debug (String m)
   {
-  	log (LogConfig.DEBUG, m);
+  	log (LogContext.DEBUG, m);
   }
 }

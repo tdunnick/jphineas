@@ -21,6 +21,8 @@ package tdunnick.jphineas.receiver;
 
 import tdunnick.jphineas.mime.*;
 import tdunnick.jphineas.xml.*;
+import tdunnick.jphineas.config.ServiceConfig;
+import tdunnick.jphineas.ebxml.*;
 
 /**
  * This processor generates responses for ebXML PING requests.
@@ -30,14 +32,14 @@ import tdunnick.jphineas.xml.*;
  */
 public class PingProcessor extends ReceiverProcessor
 {
-  XmlConfig config = null;
+  ServiceConfig config = null;
   
 	/**
 	 * Simply save the configuration
 	 * @param config to save
-	 * @see tdunnick.jphineas.receiver.ReceiverProcessor#configure(tdunnick.jphineas.xml.XmlConfig)
+	 * @see tdunnick.jphineas.receiver.ReceiverProcessor#configure(tdunnick.jphineas.config.ServiceConfig)
 	 */
-	protected boolean configure(XmlConfig config)
+	protected boolean configure(ServiceConfig config)
 	{
 		this.config = config;
 		return true;
@@ -52,10 +54,8 @@ public class PingProcessor extends ReceiverProcessor
 	 */
 	protected MimeContent process (SoapXml request, MimeContent[] parts)
 	{
-		ReceiverSoapEnvelope env = new ReceiverSoapEnvelope (request);
-		EbXmlReceiverPackage pkg = new EbXmlReceiverPackage (config);
-		// build a soap part
-		SoapXml response = env.getSoapResponse("Pong", config.getValue ("Organization"));
-		return pkg.getMessagePackage(response);
+		EbXmlResponse pkg = new EbXmlResponse (config);
+		// return simple response
+		return pkg.getMessagePackage(request, "Pong");
 	}
 }

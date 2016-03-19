@@ -40,7 +40,7 @@ public class ResponseXml extends XmlContent
    */
   public ResponseXml ()
   {
-  	super (template);
+  	load (template);
   }
   
   /**
@@ -49,7 +49,7 @@ public class ResponseXml extends XmlContent
    */
   public ResponseXml (String xml)
   {
-  	super (xml);
+  	load (xml);
   }
   
   /**

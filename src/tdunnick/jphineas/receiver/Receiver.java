@@ -27,8 +27,8 @@ import javax.servlet.*;
 import javax.servlet.http.*;
 
 import tdunnick.jphineas.common.*;
+import tdunnick.jphineas.config.*;
 import tdunnick.jphineas.logging.*;
-import tdunnick.jphineas.queue.*;
 import tdunnick.jphineas.xml.*;
 import tdunnick.jphineas.mime.*;
 
@@ -84,82 +84,42 @@ public class Receiver extends HttpServlet
 		if (configName == null)
 			return false;
 		Thread.currentThread().setName("Receiver");
-		final String servicePrefix = "ServiceInfo.Service";
 		
 		// add bouncy castle to the security providers for missing algorithms
 	  java.security.Security.addProvider (
 	  		new org.bouncycastle.jce.provider.BouncyCastleProvider());
 
-	  XmlConfig master = new XmlConfig ();
-		if (!master.load(new File (configName)))
+		// get receiver's configuration
+	  PhineasConfig p = new PhineasConfig ();
+		if (!p.load(new File (configName)))
 		{
 			status = "failed loading " + configName;
 			return false;
 		}
-		XmlConfig config = new XmlConfig ();
-		if (!config.load(master.getFile("Receiver")))
-		{
-			status = "Failed loading " + master.getValue("Receiver");
-			return false;
-		}
-		// copy in globals values
-		config.setValue("HostId", master.getValue ("HostId"));
-		config.setValue("Domain", master.getValue ("Domain"));
-		config.setValue("Organization", master.getValue ("Organization"));
-		logId = Log.xmlLogConfig (config.copy("Log"));
+		ReceiverConfig config = p.getReceiver();
+		logId = Log.configure (config.getLog());
 		Log.info("Receiver starting...");
 		// CPA folder and reply cache
-		cpadir = config.getDirectory("CpaDirectory");
-		replies = new ReplyCache (config.getFolder("CacheDirectory"));
-		if (config.getValue("Domain") == null)
-		{
-			try
-			{
-			  config.setValue("Domain", InetAddress.getLocalHost().getCanonicalHostName());
-			}
-			catch (Exception e)
-			{
-				Log.warn("Can't set Sender.Domain " + e.getMessage());
-			}
-		}
+		cpadir = config.getCpaDirectory();
+		replies = new ReplyCache (config.getCacheFolder());
 		// set up our service/action processor map
-		for (int i = 0; i < config.getTagCount(servicePrefix); i++)
+		int n = config.getServiceCount ();
+		while (n-- > 0)
 		{
-			XmlConfig cfg = config.copy(servicePrefix + "[" + i + "]");
-			String serviceAction = cfg.getValue("Service") + ":" + cfg.getValue ("Action");
-			ReceiverProcessor processor = null;
-			String pname = cfg.getValue("Processor");
-			if (pname == null)
-				pname = "tdunnick.jphineas.Receiver.MessageProcessor";
-			String emsg = null;
-	  	try
+			ServiceConfig cfg = config.getService (n);
+			String serviceAction = cfg.getService() + ":" + cfg.getAction();
+			ReceiverProcessor processor = cfg.getProcessor ();
+			if (processor == null)
 			{
-				Class<?> cf = Class.forName(pname);
-				if (!ReceiverProcessor.class.isAssignableFrom(cf))
-					emsg = pname + " is not a ReceiverProcessor";
-				else
-				{
-					processor = (ReceiverProcessor) cf.newInstance();
-					if (!processor.configure (cfg))
-					  emsg = "Could not configure " + pname;
-					else
-						processors.put(serviceAction, processor);
-				}
+				Log.error("Failed loading processor for " + serviceAction);
+				continue;
 			}
-			catch (ClassNotFoundException e)
+			if (!processor.configure (cfg))
 			{
-				emsg = "Processor " + pname + " not found";
+				Log.error("Failed configuring processor for " + serviceAction);
+				continue;
 			}
-			catch (InstantiationException e)
-			{
-				emsg = "Can't create new instance of " + pname;
-			}
-			catch (IllegalAccessException e)
-			{
-				emsg = "Can't access new instance of " + pname;
-			}
-			if (emsg != null)
-				Log.error("Failed configuring " + serviceAction + " " + emsg);			
+			processors.put(serviceAction, processor);
 		}
 		Log.info("Receiver started");
 		status = "running";

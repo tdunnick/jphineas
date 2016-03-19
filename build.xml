@@ -107,7 +107,24 @@
 		pathsep=" " refid="jphineas.classpath" >
 		<map from="${weblib}/" to="WEB-INF/lib/" />
 	</pathconvert>
-		
+	
+	<!-- debug filter -->
+	<target name="dbfilter" >
+	  <property name="dbjar" value="dbfilter.jar" />
+		<property name="phinmsdir" value="C:/Program Files/PHINMS2.8.02/appserver/webapps/receiver/WEB-INF/lib" />
+    <delete file="${phinmsdir}/${dbjar}" failonerror="false" />
+    <jar jarfile="${phinmsdir}/${dbjar}">
+      <fileset dir="${build}" 
+        includes="**/Debug*.class,**/MimeBeautifier.class"
+      />
+      <!--
+      <manifest>
+         <attribute name="Class-Path" value="${manifest.classpath}"/>
+      </manifest>
+       -->
+    </jar>
+	</target>
+	
 	<!-- the jar -->
 	<target name="jar" >
     <delete file="${basedir}/${jphineasjar}" failonerror="false" />

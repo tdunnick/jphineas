@@ -32,8 +32,8 @@ class MimeReceiverTest extends GroovyTestCase
 		
 	 protected void setUp() throws Exception
 	 {
-		 LogConfig dflt = Log.getLogConfig();
-		 dflt.setLogLevel(LogConfig.DEBUG)
+		 LogContext dflt = Log.getLogConfig();
+		 dflt.setLogLevel(LogContext.DEBUG)
 		 dflt.setLogLocal(true)
 		 dflt.setLogStream (null);
 	 }

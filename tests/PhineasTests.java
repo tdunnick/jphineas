@@ -32,7 +32,9 @@ public class PhineasTests
 		suite.addTestSuite(XmlContentTest.class);
 		suite.addTestSuite(XmlConfigTest.class);
 		suite.addTestSuite(LogTest.class);
+		suite.addTestSuite(EncryptorTest.class);
 		suite.addTestSuite(EncryptorFilterTest.class);
+		suite.addTestSuite(SignXMLTest.class);
 		suite.addTestSuite(MimeContentTest.class);
 		suite.addTestSuite(MimeReceiverTest.class);
 		suite.addTestSuite(PhineasQTest.class);

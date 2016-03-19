@@ -25,6 +25,7 @@ import javax.naming.*;
 import javax.naming.directory.*;
 import java.security.*;
 import java.security.cert.*;
+
 import javax.crypto.*;
 import javax.crypto.spec.*;
 
@@ -187,6 +188,20 @@ public class Encryptor
   public Key getPrivateKey (String path, String passwd, String keypass, StringBuffer dn)
 	{
 		KeyStore ks = getKeyStore(path, passwd);
+		return getPrivateKey (ks, keypass, dn);
+	}
+  
+	/**
+	 * Gets the private key from a keystore.  If the DN
+	 * is empty or null, pick the first entry and fill in a non-null DN.
+	 * 
+	 * @param ks keystore
+	 * @param keypass for entry
+	 * @param dn of the entry
+	 * @return private key
+	 */
+  public Key getPrivateKey (KeyStore ks, String keypass, StringBuffer dn)
+  {
 		String alias = getAlias(ks, dn);
 		if (alias == null)
 			return null;
@@ -196,7 +211,7 @@ public class Encryptor
 		}
 		catch (Exception e)
 		{
-			Log.error("Can't find " + dn + " in " + path + ": "
+			Log.error("Can't find " + dn + " in keystore: "
 					+ e.getMessage());
 		}
 		return null;
@@ -351,6 +366,25 @@ public class Encryptor
 			return null;
 		}
 	}
+  
+  /**
+   * Get the public key from a keystore entry
+   * @param ks keystore
+   * @param dn entry name
+   * @return key or null if it fails
+   */
+  public Key getPublicKey (KeyStore ks, StringBuffer dn)
+  {
+  	try
+  	{
+			X509Certificate cert = (X509Certificate) ks.getCertificate(getAlias (ks, dn));
+			return cert.getPublicKey();
+  	}
+  	catch (KeyStoreException e)
+  	{
+  		return null;
+  	}
+  }
 	
   private IvParameterSpec getIv (int mode)
   {

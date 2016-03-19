@@ -20,6 +20,8 @@
 ;
 
 import groovy.util.GroovyTestCase;
+import tdunnick.jphineas.config.RouteConfig;
+import tdunnick.jphineas.config.XmlConfig;
 import tdunnick.jphineas.logging.*;
 import tdunnick.jphineas.sender.*;
 import tdunnick.jphineas.xml.*;
@@ -27,10 +29,12 @@ import tdunnick.jphineas.xml.*;
 class RouteInfoTest extends GroovyTestCase
 {
 	def confg = """<?xml version="1.0" encoding="UTF-8"?>
+<JPhineas>
 	<Sender>
 	  <RouteInfo>
 	    <Route>
 	      <Name>foo</Name>
+			  <Processor>ebXML</Processor>
 	      <PartyId>fooparty</PartyId>
 	      <Cpa>foocpa</Cpa>
 	      <Host>foohost</Host>
@@ -49,7 +53,7 @@ class RouteInfoTest extends GroovyTestCase
 	    </Route>
 		  <Route>
 			  <Name>bar</Name>
-			  <Processor>tdunnick.jphineas.sender.file.FileRouteProcessor</Processor>
+			  <Processor>file</Processor>
 			  <PartyId>barid</PartyId>
 			  <Cpa>barcpa</Cpa>
 			  <Host>barhost</Host>
@@ -63,9 +67,20 @@ class RouteInfoTest extends GroovyTestCase
 			    <Unc>certpath</Unc>
 			  </Authentication>
 		    <Packager>test.TestPackager</Packager>
-		</Route>
+		  </Route>
+      <ProcessorInfo>
+        <Processor>
+          <Name>ebXML</Name>
+          <Class>tdunnick.jphineas.sender.ebxml.EbXmlRouteProcessor</Class>
+        </Processor>
+        <Processor>
+          <Name>file</Name>
+          <Class>tdunnick.jphineas.sender.file.FileRouteProcessor</Class>
+        </Processor>
+      </ProcessorInfo>
 	  </RouteInfo>
-	</Sender>"""
+	</Sender>
+</JPhineas>"""
 	
 	XmlConfig cfg = null;
 	RouteInfo inf = new RouteInfo ();
@@ -74,27 +89,33 @@ class RouteInfoTest extends GroovyTestCase
 	{
 		cfg = new XmlConfig ()
 		cfg.load (confg.toString())
-		LogConfig dflt = Log.getLogConfig();
-		dflt.setLogLevel(LogConfig.DEBUG)
+		LogContext dflt = Log.getLogConfig();
+		dflt.setLogLevel(LogContext.DEBUG)
 		dflt.setLogLocal(true)
-		dflt.setLogStream (null)
+		dflt.setLogStream (System.out)
+		cfg.setDefaultDir (new File (System.getProperty ("java.io.tmpdir")));
 	}
 	
 	public final void testSetRouteInfo()
 	{
-		// assert cfg.getValue ("Name") != null : "failed loading test configuration"
-		assert inf.configure (cfg.copy ("RouteInfo.Route[0]")): "Failed 1st configuration"
-		assert inf.getName().equals("foo") : "name doesn't match foo"
+		RouteConfig r = new RouteConfig ();
+		r = cfg.copy (r, "Sender.RouteInfo.Route[0]");
+		assert r != null : "Failed copying Route[0]"
+		assert inf.configure (r): "Failed 1st configuration"
+		assert inf.getName().equals("foo") : "name '" + inf.getName() + "' doesn't match foo"
 		assert inf.getTimeout() == 100 : "timeout doesn't match 100"
 		assert inf.getRetry() == 10 : "retry doesn't match 10"
 		assert inf.getProcessor() != null : "no processor loaded"
 		assert inf.getProcessor().getClass().getName().equals("tdunnick.jphineas.sender.ebxml.EbXmlRouteProcessor") :  "default processor incorrect"
 
-		assert inf.configure (cfg.copy ("RouteInfo.Route[1]")): "Failed 2nd configuration"
+		r = cfg.copy (r, "Sender.RouteInfo.Route[1]");
+		assert r != null : "Failed copying Route[1]";
+		assert inf.configure (r): "Failed 2nd configuration"
 		assert inf.getName().equals("bar") : "name doesn't match bar"
 		assert inf.getTimeout() == 200 : "timeout doesn't match 200"
 		assert inf.getRetry() == 20 : "retry doesn't match 20"
 		assert inf.getProcessor () != null : "no processor loaded"
-		assert inf.getProcessor().getClass().getName().equals("tdunnick.jphineas.sender.file.FileRouteProcessor") : "expected File processor"
+		assert inf.getProcessor().getClass().getName().equals("tdunnick.jphineas.sender.file.FileRouteProcessor") : "expected File processor got " + 
+		  inf.getProcessor().getClass().getName()
 	}
 }

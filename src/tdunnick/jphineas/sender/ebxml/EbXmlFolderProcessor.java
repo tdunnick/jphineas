@@ -22,6 +22,7 @@ package tdunnick.jphineas.sender.ebxml;
 import java.io.*;
 import java.lang.reflect.*;
 
+import tdunnick.jphineas.config.FolderConfig;
 import tdunnick.jphineas.filter.*;
 import tdunnick.jphineas.logging.*;
 import tdunnick.jphineas.queue.*;
@@ -39,33 +40,18 @@ import tdunnick.jphineas.xml.*;
  */
 public class EbXmlFolderProcessor extends FolderProcessor
 {	
-	XmlConfig config = null;
+	FolderConfig config = null;
 	
 	PhineasQ queue = null;		// this folder's queue
 	Constructor <?> filter = null; // a filter
 	
-	protected boolean configure (XmlConfig config)
+	protected boolean configure (FolderConfig config)
 	{
 		this.config = config;
 		
-		if ((queue = PhineasQManager.getInstance().getQueue(config.getValue("Queue"))) == null)
+		if ((queue = PhineasQManager.getInstance().getQueue(config.getQueue())) == null)
 		  return false;	
-		String s = config.getValue("Filter.Class");
-		if (s != null) try
-		{
-			Class<?> cf = Class.forName(s);
-			if (!PhineasInputFilter.class.isAssignableFrom(cf))
-			{
-				Log.error(s + " is not a PhineasInputFilter");
-				return false;
-			}
-			filter = cf.getConstructor(InputStream.class);
-		}
-		catch (Exception e)
-		{
-			Log.error("Couldn't load filter " + s, e);
-			return false;
-		}		
+		filter = config.getFilter();
 		return true;
 	}
 	
@@ -83,12 +69,12 @@ public class EbXmlFolderProcessor extends FolderProcessor
 	 */
 	protected boolean process (File src)
 	{
-		Log.debug("Processing " + src.getPath() + " for " + config.getValue("Name"));
+		Log.debug("Processing " + src.getPath() + " for " + config.getName());
 		long pid = ProcessID.getNewId();
 		// get a unique name
 		String fname = src.getName() + "." + pid;
 		// and move it to processed
-		File dst = new File (config.getFolder ("Processed").getPath() + "/" + fname);
+		File dst = new File (config.getProcessed().getPath() + "/" + fname);
 		// if the move fails, another process still has it open, probably the writer!
 		// this is done FIRST to prevent race conditions
 		if (!src.renameTo(dst))
@@ -101,7 +87,7 @@ public class EbXmlFolderProcessor extends FolderProcessor
 		try
 		{
 			InputStream in = new FileInputStream (dst);
-			// add any user filter to this input
+			/* TODO add any user filter to this input
 			if (filter != null)
 			{
 				try
@@ -112,10 +98,11 @@ public class EbXmlFolderProcessor extends FolderProcessor
 				}
 				catch (Exception e)
 				{
-					Log.error("Couldn't load filter for " + config.getValue("Name"), e);
+					Log.error("Couldn't load filter for " + config.getName(), e);
 					return false;
 				}
 			}
+			*/
 			/*
 			// could add an encryption filter to this input instead of using RouteProcessor
 			// note our encryption if any
@@ -132,7 +119,7 @@ public class EbXmlFolderProcessor extends FolderProcessor
 			*/
 
 			// write the filtered data to the queue directory
-			dst = new File (config.getDirectory ("QueueDirectory") + fname);
+			dst = new File (config.getQueueDirectory () + fname);
 			OutputStream out = new FileOutputStream (dst);
 			int c;
 			while ((c = in.read()) >= 0)
@@ -152,7 +139,7 @@ public class EbXmlFolderProcessor extends FolderProcessor
 		r.setPayLoadFile (fname);
 		r.setDestinationFileName (src.getName());
 		// TODO figure out best place to put ACK path in queue
-		r.setResponseFileName(config.getFolder ("Acknowledged").getPath() + "/" + fname);
+		r.setResponseFileName(config.getAcknowledged().getPath() + "/" + fname);
 		return EbXmlQueue.add(config, r);
 	}
 }

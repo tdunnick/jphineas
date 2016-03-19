@@ -27,8 +27,11 @@ import java.net.*;
 import tdunnick.jphineas.logging.Log;
 import tdunnick.jphineas.mime.*;
 import tdunnick.jphineas.sender.*;
+import tdunnick.jphineas.util.SocketFactory;
 import tdunnick.jphineas.queue.*;
 import tdunnick.jphineas.xml.*;
+import tdunnick.jphineas.config.RouteConfig;
+import tdunnick.jphineas.ebxml.*;
 
 /**
  * This is the route processor for ebXML (standard PHINMS) outgoing messages.
@@ -42,15 +45,19 @@ import tdunnick.jphineas.xml.*;
  */
 public class EbXmlRouteProcessor extends RouteProcessor
 {
-	private XmlConfig config = null;
+	private RouteConfig config = null;
   /** route path part of URL */
-  private EbXmlSenderPackage pkg = null;
+  private EbXmlRequest pkg = null;
+  /** place to queue outgoing files... */
+  String qDirectory = null;
 
-	public boolean configure (XmlConfig config)
+	public boolean configure (RouteConfig cfg)
 	{
-		if ((this.config = config) == null)
+		if ((this.config = cfg) == null)
 			return false;
-  	pkg = new EbXmlSenderPackage (config);
+  	pkg = new EbXmlRequest (cfg);
+  	if ((qDirectory = cfg.getQueueDirectory()) == null)
+  		qDirectory = "";
 		return true;
 	}
 	 
@@ -99,7 +106,7 @@ public class EbXmlRouteProcessor extends RouteProcessor
 			s = row.getPayLoadFile();
 			if (s != null)
 			{
-				File f = new File (config.getDirectory("QueueDirectory") + s);
+				File f = new File (qDirectory + s);
 				if (!f.delete())
 					Log.error("Couldn't delete cached file " + f.getAbsolutePath());
 			}
@@ -127,23 +134,26 @@ public class EbXmlRouteProcessor extends RouteProcessor
   	MimeContent mime = pkg.getMessagePackage(row);
   	if (mime == null)
   		return complete (row);
-  	String req = config.getValue("Authentication.Type");
+  	String req = config.getAuthenticationType();
   	// insert BASIC authentication
   	if ((req != null) && (req.equalsIgnoreCase("basic")))
   	{
-  		mime.setBasicAuth(config.getValue("Authentication.Id"), 
-  				config.getValue("Authentication.Password"));
+  		mime.setBasicAuth(config.getAuthenticationId(), 
+  				config.getAuthenticationPassword());
   	}
   	// set up a connection and response handler
-   	Socket socket = SenderSocketFactory.createSocket(config);
-   	if (socket == null)
+   	Socket socket = SocketFactory.createSocket(config);
+   	if ((socket == null) || !socket.isConnected())
+   	{
+   		Log.error("Failed to open connection to " + config.getHost());
    		return false;
+   	}
    	// build a request string...
    	req = "POST " 
-   		+ config.getValue("Protocol") + "://"
-   		+ config.getValue("Host") + ":"
-   		+ config.getValue("Port")
-   		+ config.getValue("Path") 
+   		+ config.getProtocol () + "://"
+   		+ config.getHost () + ":"
+   		+ config.getPort ()
+   		+ config.getPath ()
    		+ " HTTP/1.1\r\n";
    	// now ready to send it off
   	try

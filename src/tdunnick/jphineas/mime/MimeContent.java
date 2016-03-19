@@ -19,8 +19,7 @@
 
 package tdunnick.jphineas.mime;
 
-import java.util.Date;
-import java.util.ArrayList;
+import java.util.*;
 import org.bouncycastle.util.encoders.*;
 
 /**
@@ -33,7 +32,7 @@ public class MimeContent
 {
 	private StringBuffer buf = new StringBuffer ();
 	
-	/**  MIME content header tag */
+	/**  MIME content type header tag */
 	public static final String CONTENT = "Content-Type";
 	/**  MIME text value for CONTENT */
 	public static final String TEXT = "text/plain";
@@ -109,6 +108,25 @@ public class MimeContent
 	}
 	/**
 	 * Set the MIME CONTENT type
+	 * @param id of CONTENT
+	 */
+	public void setContentId (String id)
+	{	
+			setHeader (CONTENTID, id);
+	}
+	
+	/**
+	 * Gets the current CONTENT type
+	 * @return type of content
+	 */
+	public String getContentId ()
+	{
+		return getHeader (CONTENTID);
+	}
+	
+
+	/**
+	 * Set the MIME CONTENT type
 	 * @param type of CONTENT
 	 */
 	public void setContentType (String type)
@@ -145,6 +163,25 @@ public class MimeContent
 	{
 		return getHeader (ENCODING);
 	}
+	
+	/**
+	 * Sets the MIME dispostion.
+	 * @param d disposition to use
+	 */
+	public void setDisposition (String d)
+	{
+		setHeader (DISPOSITION, d);
+	}
+	
+	/**
+	 * Gets the current MIME disposition
+	 * @return encoding or null if none is set
+	 */
+	public String getDisposition ()
+	{
+		return getHeader (DISPOSITION);
+	}
+
 	
 	/**
 	 * Set BASIC authentication
@@ -304,6 +341,7 @@ public class MimeContent
 	public boolean encodeBody (byte[] body)
 	{
 		setEncoding (BASE64);
+		setContentType (MimeContent.OCTET);
 		setBody (new String (Base64.encode(body)));
 		return false;
 	}
@@ -317,6 +355,39 @@ public class MimeContent
 		if (getEncoding().equalsIgnoreCase(BASE64))
 			return Base64.decode(buf.toString().getBytes());
 		return buf.toString().getBytes();
+	}
+	
+	/**
+	 * parse the body of this content as POST parameters 
+	 * @return table of paramters
+	 */
+	public HashMap <String, String> getParams ()
+	{
+		HashMap <String, String> arg = new HashMap <String, String> ();
+		String[] t = getBody().split("[&]");
+		for (int i = 0; i < t.length; i++)
+		{
+			String[] a = t[i].split("=");
+			if (a.length == 2)
+				arg.put(a[0].trim(), a[1].trim());
+		}
+		return arg;
+	}
+	
+	/**
+	 * Set the body with a map of POST parameters
+	 * @param params
+	 */
+	public void setParams (HashMap <String, String> params)
+	{
+		StringBuffer buf = new StringBuffer ();
+		Iterator <String> it = params.keySet().iterator();
+		while (it.hasNext())
+		{
+			String k = it.next();
+			buf.append(k + "=" + params.get (k) + "&");
+		}
+		setBody (buf.substring(0, buf.length() - 1));
 	}
 	
 	public boolean setMultiPart ()

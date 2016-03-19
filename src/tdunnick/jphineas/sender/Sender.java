@@ -25,6 +25,7 @@ import javax.servlet.*;
 import javax.servlet.http.*;
 
 import tdunnick.jphineas.common.*;
+import tdunnick.jphineas.config.*;
 import tdunnick.jphineas.logging.*;
 import tdunnick.jphineas.queue.*;
 import tdunnick.jphineas.sender.ebxml.EbXmlQueue;
@@ -77,58 +78,16 @@ public class Sender extends HttpServlet
 	  		new org.bouncycastle.jce.provider.BouncyCastleProvider());
 
 		// load the configuration
-	  XmlConfig master = new XmlConfig ();
-		if (!master.load(new File (configName)))
+	  PhineasConfig p = new PhineasConfig ();
+		if (!p.load(new File (configName)))
 		{
 			status = "failed loading " + configName;
 			return false;
 		}
-		XmlConfig config = new XmlConfig ();
-		if (!config.load(master.getFile("Sender")))
-		{
-			status = "Failed loading configuration from " 
-				+ master.getValue ("Sender");
-			return false;
-		}
-		// copy in globals values
-		config.setValue("HostId", master.getValue ("HostId"));
-		config.setValue("Domain", master.getValue ("Domain"));
-		config.setValue("Organization", master.getValue ("Organization"));
+		SenderConfig config = p.getSender();
 		// configure logging
-		logId = Log.xmlLogConfig(config.copy("Log"));
+		logId = Log.configure (config.getLog ());
 		Log.info("Starting sender servlet...");
-		if (config.getValue("Domain") == null)
-		{
-			try
-			{
-			  config.setValue("Domain", InetAddress.getLocalHost().getCanonicalHostName());
-			}
-			catch (Exception e)
-			{
-				Log.warn("Can't set Sender.Host " + e.getMessage());
-			}
-		}
-		if (config.getInt("PollInterval") < 1)
-		{
-			Log.warn ("Setting default PollInterval to 30");
-			config.setValue("PollInterval", "30");
-		}
-		if (config.getInt("MaxThreads") < 1)
-		{
-			Log.warn ("Setting default MaxThreads to 3");
-			config.setValue ("MaxThreads", "3");
-		}
-		if (config.getFolder("QueueDirectory") == null)
-		{
-			s = System.getProperty ("java.io.tmpdir");
-			if (s == null)
-			{
-				Log.error("Can't set QueueDirectory");
-				return false;
-			}
-			Log.warn ("Setting default QueueDirectory to " + s);
-			config.setValue("QueueDirectory", s);
-		}
 		// start the folder poller
 		folderPoller = new FolderPoller (config);
 		folderPoller.start();

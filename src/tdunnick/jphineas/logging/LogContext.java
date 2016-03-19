@@ -29,7 +29,7 @@ import java.io.*;
  * @author tld
  *
  */
-public class LogConfig
+public class LogContext
 {
 	public static final int OFF = 0;
 	public static final int ERROR = OFF + 1;
@@ -380,9 +380,9 @@ class LogRoller extends Thread
 {
 	/** milliseconds per day */
 	private static final long msPerDay = 24 * 60 * 60 * 1000;
-	private LogConfig config;
+	private LogContext config;
 
-	protected LogRoller (LogConfig c)
+	protected LogRoller (LogContext c)
 	{
 		config = c;
 	}

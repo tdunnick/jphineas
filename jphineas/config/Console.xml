@@ -247,7 +247,6 @@
         <Input>
           <Tags>Authentication Type</Tags>
           <Type>select</Type>
-          <Option/>
           <Options>none basic certificate sdn</Options>
           <Help>
 			      If the sender must authenticate itself to the receiver for 
@@ -434,7 +433,6 @@
         <Input>
           <Tags>Encryption Type</Tags>
           <Type>select</Type>
-          <Option/>
           <Options>certificate LDAP PBE</Options>
            <Help>
 			      If payload encryption is desired, the Encryption Type determines
@@ -617,6 +615,14 @@
           </Help>
         </Input>
         <Input>
+          <Tags>Processor</Tags>
+          <Type>select</Type>
+          <Ref>Receiver ServiceInfo ProcessorInfo Processor</Ref>
+          <Help>
+            Selects the type of processing for this service.
+          </Help>
+        </Input>
+        <Input>
           <Tags>Filter</Tags>
           <Type>text</Type>
           <Width>44</Width>
@@ -639,7 +645,6 @@
         <Input>
           <Tags>Decryption Type</Tags>
           <Type>select</Type>
-          <Option/>
           <Options>none certificate LDAP PBE</Options>
           <Help>
             Payloads may be decrypted using PEM, DER, or PKCS12 certificates.

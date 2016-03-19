@@ -19,6 +19,7 @@
 
 package tdunnick.jphineas.sender;
 import tdunnick.jphineas.xml.*;
+import tdunnick.jphineas.config.RouteConfig;
 import tdunnick.jphineas.queue.*;
 
 /**
@@ -36,7 +37,7 @@ public abstract class RouteProcessor
 	 * @param config for this Route 
 	 * @return true if successful
 	 */
-	protected abstract boolean configure (XmlConfig config);
+	protected abstract boolean configure (RouteConfig config);
   /**
    * Do any requested processing on this queue row
    * @param row to process

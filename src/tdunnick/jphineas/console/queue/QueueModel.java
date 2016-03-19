@@ -25,6 +25,7 @@ import java.util.*;
 import javax.servlet.http.*;
 
 import tdunnick.jphineas.common.*;
+import tdunnick.jphineas.config.XmlConfig;
 import tdunnick.jphineas.queue.*;
 import tdunnick.jphineas.logging.*;
 import tdunnick.jphineas.xml.*;

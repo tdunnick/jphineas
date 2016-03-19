@@ -24,6 +24,7 @@ import java.util.*;
 import java.text.*;
 import javax.servlet.http.HttpServletRequest;
 
+import tdunnick.jphineas.config.XmlConfig;
 import tdunnick.jphineas.logging.*;
 import tdunnick.jphineas.xml.*;
 
@@ -37,34 +38,22 @@ public class ConfigModel
 {
 	XmlConfig 
 	  config = null,
-	  master = null,
-	  sender = null,
-		receiver = null,
-		queues = null;
+	  master = null;
 	File 
 	  masterFile = null,
-	  senderFile = null,
-	  receiverFile = null,
-	  queueFile = null,
 	  revisions = null;
 	SimpleDateFormat dirfmt = new SimpleDateFormat ("yyyyMMddHHmmss");
 	SimpleDateFormat selfmt = new SimpleDateFormat ("MMM dd, yyyy HH:mm:ss");
 	
   /**
    * Read and load the configurations managed by the console.
-   * @param master for the console.
+   * @param masterName for the console.
    * @return true if successful
    */
   public boolean initialize (String masterName)
   {
   	masterFile = new File (masterName);
   	reload (master = new XmlConfig (), masterFile, null);
-  	queueFile = master.getFile ("Queues");
-   	reload (queues = new XmlConfig (), queueFile, null);
-  	senderFile = master.getFile ("Sender");
-   	reload (sender = new XmlConfig (), senderFile, null);
-		receiverFile = master.getFile ("Receiver");
-	 	reload (receiver = new XmlConfig (), receiverFile, null);
 	 	// our config (Console) is NOT configurable... we load it ONCE here
 	 	reload (config = new XmlConfig (), master.getFile ("Console"), null);
   	revisions = config.getFolder("Revisions");
@@ -99,7 +88,7 @@ public class ConfigModel
   		Log.error ("Couldn't load " + c.getAbsolutePath());
   		return false;
 		}
- 		x.reset (c);
+  	x.setDefaultDir (c);
   	// Log.debug("Reloaded " + c.getAbsolutePath());
   	return true;
   }
@@ -112,9 +101,6 @@ public class ConfigModel
   private boolean reload (String dir)
   {
 		reload (master, masterFile, dir);
-  	reload (queues, queueFile, dir);
-  	reload (sender, senderFile, dir);
-  	reload (receiver, receiverFile, dir);
   	return true; 	
   }
   
@@ -125,13 +111,16 @@ public class ConfigModel
    */
   private XmlConfig getConfig (String tags)
   {
+  	/* for separate configurations...
   	if (tags.startsWith("jPhineas"))
   		return master;
   	if (tags.startsWith("Receiver"))
-  		return receiver;
+  		return master.copy(new XmlConfig(), "Receiver");
   	if (tags.startsWith("Sender"))
-  		return sender;
-  	return queues;
+  		return master.copy (new XmlConfig(), "Sender");
+  	return master.copy (new XmlConfig(), "Queues");
+  	*/
+  	return master;
   }
   
   /**
@@ -194,7 +183,7 @@ public class ConfigModel
    */
   private ArrayList <ConfigInput> getInputs (XmlConfig c, String prefix)
   {
-  	int n = c.getTagCount("Input");
+  	int n = c.getPrefixCount("Input");
   	if (n == 0)
   		return null;
   	ArrayList <ConfigInput> inputs = new ArrayList <ConfigInput> ();
@@ -232,7 +221,8 @@ public class ConfigModel
   }
   
   /**
-   * Get the names for options to a data reference.
+   * Get the names for options to a data reference.  The special reference to "Revisions"
+   * fetches a list of versions from a revision folder.
    * @param ref to XML data names
    * @return space delimited list of names
    */
@@ -249,7 +239,7 @@ public class ConfigModel
   		Log.error ("No configuration for " + ref);
   		return l;
   	}
-  	int n = x.getTagCount(ref);
+  	int n = x.getPrefixCount(ref);
   	for (int i = 0; i < n; i++)
   	{
   		String s = x.getValue(ref + "[" + i + "].Name");
@@ -306,7 +296,7 @@ public class ConfigModel
   	c = c.copy("Set");
   	prefix = addTag (c, prefix);
   	XmlConfig x = getConfig (prefix);
-  	int n = x.getTagCount(prefix);
+  	int n = x.getPrefixCount(prefix);
   	for (int i = 0; i < n; i++)
   	{
   		String tags = prefix + "[" + i + "]";
@@ -334,8 +324,8 @@ public class ConfigModel
   private ArrayList <ConfigTab> getTabs (XmlConfig c, String prefix)
   {
   	ArrayList <ConfigTab> tabs = new ArrayList <ConfigTab> ();
-  	int n = c.getTagCount("Tab");
-  	// Log.debug("Found " + n + " tabs");
+  	int n = c.getPrefixCount("Tab");
+  	// Log.debug("Found " + n + " tabs for prefix " + prefix);
   	if (n == 0)
   	{
   		if (c.getValue("Set.Tags") != null)
@@ -352,6 +342,7 @@ public class ConfigModel
   			continue;
   		tab.help = getHelp (t);
   		tab.inputs = getInputs (t, tag);
+  		// Log.debug("Getting Tab " + i + " for " + tab.name);
   		tab.tabs = getTabs (t, tag);
   		tabs.add(tab);
   	}
@@ -417,6 +408,7 @@ public class ConfigModel
   	else if (action.equals("Save")) // save this configuration
   	{
   		String now = dirfmt.format(new Date ());
+  		// for separate directories...
   		File d = new File (revisions.getAbsolutePath() + "/" + now);
   		if (!d.mkdirs())
   		{
@@ -430,24 +422,10 @@ public class ConfigModel
     		master.beautify(2);
     		master.save(masterFile);
   		}
-  		if ((senderFile != null) && senderFile.exists())
-  		{
-  			senderFile.renameTo(new File (d.getAbsolutePath() + "/" + senderFile.getName()));
-    		sender.beautify(2);
-    		sender.save(senderFile);
-  		}
-  		if ((receiverFile != null) && receiverFile.exists())
-  		{
-  			receiverFile.renameTo(new File (d.getAbsolutePath() + "/" + receiverFile.getName()));
-    		receiver.beautify(2);
-    		receiver.save (receiverFile);
-  		}
-  		if ((queueFile != null) && queueFile.exists())
-  		{
-  			queueFile.renameTo(new File (d.getAbsolutePath() + "/" + queueFile.getName()));
-    		queues.beautify(2);
-    		queues.save (queueFile);
-  		}
+  		/* for single configuration... 
+  		masterFile.renameTo(new File (revisions.getAbsoluteFile() + "/" 
+  				+ masterFile.getName() + "." + now));
+  		*/
   		return true;  		
   	}
   	else if (action.equals ("Revert")) // revert to identified configuration

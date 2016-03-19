@@ -19,6 +19,7 @@
 
 package tdunnick.jphineas.sender;
 
+import tdunnick.jphineas.config.RouteConfig;
 import tdunnick.jphineas.logging.Log;
 import tdunnick.jphineas.xml.*;
 
@@ -31,7 +32,7 @@ import tdunnick.jphineas.xml.*;
  */
 public class RouteInfo
 {
-  XmlConfig config = null;
+  private String name = null;
   /** route package class */
   private RouteProcessor processor = null;
   /** route timeout in seconds */
@@ -39,51 +40,25 @@ public class RouteInfo
   /** route retries */
   private int retry = 0;
     
-  public boolean configure (XmlConfig config)
+  public boolean configure (RouteConfig config)
 	{
-  	if ((this.config = config) == null)
+  	if (config == null)
   	{
   		Log.error("NULL configuration");
   		return false;
   	}
-  	timeout = config.getInt("Timeout");
-  	retry = config.getInt("Retry");
-  	String p = config.getValue("Processor");
-  	if (p == null)
-  	{
-  		Log.warn ("assuming ebXML Route processor");
-  		p = "tdunnick.jphineas.sender.ebxml.EbXmlRouteProcessor";
-  	}
-  	try
-		{
-			Class<?> cf = Class.forName(p);
-			if (!RouteProcessor.class.isAssignableFrom(cf))
-				Log.error(p + " is not a RouteProcessor");
-			else
-			{
-				processor = (RouteProcessor) cf.newInstance();
-				if (processor.configure (config))
-				  return true;
-			}
-		}
-		catch (ClassNotFoundException e)
-		{
-			Log.error("Route " + p + " not found");
-		}
-		catch (InstantiationException e)
-		{
-			Log.error("Can't create new instance of " + p);
-		}
-		catch (IllegalAccessException e)
-		{
-			Log.error("Can't access new instance of " + p);
-		}
+  	name = config.getName ();
+  	timeout = config.getTimeout();
+  	retry = config.getRetry ();
+  	if (((processor = config.getProcessor()) != null) && processor.configure (config))
+  		return true;
+  	Log.error("Route missing processor");
   	return false;
 	}
   
   protected String getName ()
   {
-  	return config.getValue("Name");
+  	return name;
   }
   
   protected int getTimeout ()

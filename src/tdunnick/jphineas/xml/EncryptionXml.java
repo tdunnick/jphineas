@@ -59,7 +59,7 @@ public class EncryptionXml extends XmlContent
 	 */
 	public EncryptionXml ()
 	{
-		super (template);
+		load (template);
 	}
 	
 	/**
@@ -68,7 +68,7 @@ public class EncryptionXml extends XmlContent
 	 */
 	public EncryptionXml (String xml)
 	{
-		super (xml);
+		load (xml);
 	}
 	
 	/**

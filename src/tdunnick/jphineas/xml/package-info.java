@@ -18,8 +18,8 @@
  */
 
 /**
- * jPhineas includes utility classes for managing all things XML and associated
- * configurations.  The underlying object is a {@link org.w3c.dom.Document W3C Document}.
+ * jPhineas includes utility classes for managing all things XML.
+ * The underlying object is a {@link org.w3c.dom.Document W3C Document}.
  * <p>
  * The {@link tdunnick.jphineas.xml.XmlContent XmlContent} class provides a simplified
  * view of a document with access methods using syntax similar to properties.  XML tags
@@ -27,15 +27,6 @@
  * brackets enclosing a number to form a "path" to a given node (value).  
  * Thus a single node in the XML can be read, created, or written with a single 
  * method call.
- * <p>
- * The {@link tdunnick.jphineas.xml.XmlConfig XmlConfig} class provides convenience 
- * methods for accessing configuration values without the need for a full tag "path".
- * Each class within jPhineas can be passed a configuration with "short cuts" to 
- * data of interest.
- * <p>
- * All folder and file references within the configuration may be either absolute
- * (from the root) or relative.  For the latter a <b>DefaultDir</b> may be specified
- * as the prefix.
  * <p>
  * Additional classes exist for creating and accessing XML that is associated with
  * ebXML including SOAP, encryption, responses, etc.  These classes include the

@@ -139,8 +139,8 @@ class PhineasQTest extends GroovyTestCase
 	protected void setUp() throws Exception
 	{
 		delPhineasdb()
-		LogConfig dflt = Log.getLogConfig();
-		dflt.setLogLevel(LogConfig.DEBUG)
+		LogContext dflt = Log.getLogConfig();
+		dflt.setLogLevel(LogContext.DEBUG)
 		dflt.setLogLocal(true)
 		dflt.setLogStream (null)
   	File f = new File ("hsql/testdb.xml")

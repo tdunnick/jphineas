@@ -21,6 +21,7 @@ package tdunnick.jphineas.queue;
 
 import java.util.*;
 
+import tdunnick.jphineas.config.XmlConfig;
 import tdunnick.jphineas.xml.*;
 
 /**
@@ -103,7 +104,7 @@ public class PhineasQType
 	
 	/**
 	 * Get a list of ID's ordered by their index
-	 * @return
+	 * @return array of queue ID's
 	 */
 	public String[] getIds ()
 	{

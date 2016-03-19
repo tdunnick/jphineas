@@ -24,12 +24,12 @@ import tdunnick.jphineas.logging.*;
 
 class LogTest extends GroovyTestCase
 {
-	LogConfig dflt = Log.getLogConfig();
+	LogContext dflt = Log.getLogConfig();
 	OutputStream out = new ByteArrayOutputStream ();
 	
 	protected void setUp() throws Exception
 	{
-		dflt.setLogLevel (LogConfig.DEBUG)
+		dflt.setLogLevel (LogContext.DEBUG)
 		dflt.setLogStream (out)
 		dflt.setLogLocal (true)
 	}

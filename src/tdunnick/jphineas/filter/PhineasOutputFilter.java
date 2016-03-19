@@ -21,6 +21,7 @@ package tdunnick.jphineas.filter;
 
 import java.io.*;
 
+import tdunnick.jphineas.config.XmlConfig;
 import tdunnick.jphineas.xml.*;
 
 /**

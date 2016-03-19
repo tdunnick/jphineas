@@ -28,14 +28,18 @@ public class LogModel
   public LogData getLogData (HttpServletRequest request)
   {
   	LogData logs = new LogData ();
-  	HashMap <String, LogConfig> configs = Log.getLoggers ();
-  	ArrayList <LogConfig> lc = new ArrayList <LogConfig> ();
+  	HashMap <String, LogContext> configs = Log.getLoggers ();
+  	ArrayList <LogContext> lc = new ArrayList <LogContext> ();
   	Iterator <String> it = configs.keySet().iterator();
   	while (it.hasNext())
   	{
-  		LogConfig l = configs.get (it.next());
+  		LogContext l = configs.get (it.next());
   		if (lc.contains(l))
+  		{
+  			// System.out.println ("*** Skipping log " + l.getLogId());
   			continue;
+  		}
+  		// System.out.println ("*** Adding log " + l.getLogId());
   		lc.add(l);
   	}
   	logs.logs = lc;

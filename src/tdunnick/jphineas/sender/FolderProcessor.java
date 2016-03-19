@@ -21,6 +21,7 @@ package tdunnick.jphineas.sender;
 
 import java.io.*;
 
+import tdunnick.jphineas.config.FolderConfig;
 import tdunnick.jphineas.xml.*;
 
 /**
@@ -38,7 +39,7 @@ public abstract class FolderProcessor
 	 * @param config for this Folder 
 	 * @return true if successful
 	 */
-	protected abstract boolean configure (XmlConfig config);
+	protected abstract boolean configure (FolderConfig config);
   /**
    * Do any requested processing on this Map entry
    * @param src file to process

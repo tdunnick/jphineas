@@ -22,6 +22,7 @@ package tdunnick.jphineas.xml;
 import java.io.*;
 import java.util.*;
 import org.w3c.dom.*;
+
 import javax.xml.parsers.*;
 import javax.xml.transform.*; 
 import javax.xml.transform.dom.DOMSource; 
@@ -60,33 +61,9 @@ public class XmlContent
 {
 	private Document doc = null;
   private boolean beautify = false;
+  protected Element root = null;
+  protected String rootTag = null;
 
-  /**
-   * creates an empty document
-   */
-  public XmlContent()
-	{
-  	// do nothing
-	}
-
-  /**
-   * creates a document from a string
-   * @param xml for the document
-   */
-  public XmlContent(String xml)
-	{
-  	load (xml);
-	}
-  
-  /**
-   * creates a document from a file
-   * @param xml for the document
-   */
- public XmlContent(File xml)
-	{
-  	load (xml);
-	}
-  
   /**
    * Gets the currently loaded document (for external use)
    * @return document
@@ -103,7 +80,13 @@ public class XmlContent
 	public void setDoc(Document doc)
 	{
 		this.doc = doc;
+		root = null;
+		rootTag = null;
 		beautify = false;
+		if (doc != null)
+			root = doc.getDocumentElement();
+		if (root != null)
+			rootTag = root.getTagName();
 	}
 	
 	/**
@@ -112,13 +95,12 @@ public class XmlContent
 	 */
 	public boolean createDoc ()
 	{
-		doc = null;
-		beautify = false;
+		setDoc (null);
 		try
 		{
 			DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
 			DocumentBuilder builder = factory.newDocumentBuilder();
-			doc = builder.newDocument();
+			setDoc (builder.newDocument());
 			return true;
 		}
 		catch (Exception e)
@@ -135,15 +117,15 @@ public class XmlContent
    */
   public boolean load (InputStream is)
   {
-  	doc = null;
-  	beautify = false;
+    setDoc (null);
   	if (is == null)
   		return false;
   	try
 		{
 			DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+			factory.setNamespaceAware(true); // needed for digital signatures
 			DocumentBuilder builder = factory.newDocumentBuilder();
-			doc = builder.parse(is);
+			setDoc (builder.parse(is));
 			return true;
 		}
   	catch (Exception e)
@@ -255,6 +237,22 @@ public class XmlContent
   }
   
   /**
+   * get the Element that is a parent of this node
+   * @param n child node
+   * @return parent element
+   */
+  protected Element getParentElement (Node n)
+  {
+  	if (n == null) return null;
+  	while ((n = n.getParentNode ()) != null)
+  	{
+  		if (n.getNodeType() == Node.ELEMENT_NODE)
+  			break;
+  	}
+  	return (Element) n;
+  }
+  
+  /**
    * Finds a child in this element matching the name. 
    * 
    * @param e element to search
@@ -263,7 +261,7 @@ public class XmlContent
    */
   private Element findElement (Element e, String name)
   {
-  	if ((e == null) || (name == null))
+  	if ((e == null) || (name == null) || (e.getNodeType() != Node.ELEMENT_NODE))
   		return null;
   	NodeList l = e.getChildNodes();
   	int count = 0;
@@ -281,31 +279,32 @@ public class XmlContent
   		if (n.getNodeName().equals(name) && (count-- < 1))
   			return (Element) n;
   	}
-  	// Log.debug("Couldn't match " + name + " (" + count + ")");
+  	// System.out.println ("Couldn't match " + name + " (" + count + ")");
   	return null;
   }
   
   /**
-   * Finds an element in the element subtree matching the names.  Ignore redundent
-   * "dots" in the name (e.g. "foo.bar.stuff" == "foo.bar..stuff..."
+   * Finds an element in the element subtree matching the names.  Empty
+   * tags indicate a parent including names that start with a dot.
+   * 
    * @param e element subtree
    * @param names to match
    * @return the matching element or null if not found
    */
-  public Element getElement (Element e, String names)
+  protected Element getElement (Element e, String names)
   {
+  	if (names.length() == 0)
+  	  return e;
 		String[] name = names.split("[.]");
 		
-		for (int i = 0; i < name.length; i++)
+		for (int i = 0; (i < name.length) && (e != null); i++)
 		{
 			if (name[i].length() == 0)
-				continue;
-			e = findElement (e, name[i]);
-			if (e == null)
-				return null;
+				e = getParentElement (e);
+			else
+			  e = findElement (e, name[i]);
 		}
-		return e;  	
-	
+		return e;  		
   }
   
   /**
@@ -319,22 +318,21 @@ public class XmlContent
   {
 		if ((doc == null) || (names == null) || (names.length() == 0))
 			return null;
-		String root = names;
+		String rootName = names;
 		int dot = names.indexOf(".");
 		if (dot > 0)
 		{
-			root = names.substring(0, dot);
+			rootName = names.substring(0, dot);
 			names = names.substring (dot + 1);
 	  }
 	  else
 	  	names = "";
-		Element e = doc.getDocumentElement();
-		if (!root.equals(e.getNodeName()))
+		if (!rootName.equals(rootTag))
 		{
-			// Log.debug ("Root does not match " + names);
+			// System.out.println ("Root does not match " + names);
 			return null;
 		}
-		return getElement (e, names);
+		return getElement (root, names);
   }
   
   /**
@@ -382,7 +380,7 @@ public class XmlContent
    * @return element for the added (or found) tag
    */
  
-  public Element addElement (Element e, String names)
+  private Element addElement (Element e, String names)
   {
   	if ((e == null) || (names == null))
   		return null;
@@ -412,31 +410,33 @@ public class XmlContent
    * @param names to add
    * @return element for the added (or found) tag
    */
-  public Element addElement (String names)
+  private Element addElement (String names)
   {
-		if ((doc == null) || (names == null) || (names.length() == 0))
+		if ((names == null) || (names.length() == 0))
 			return null;
-		String root = names;
+		if ((doc == null) && !createDoc ())
+			return null;
+		String rootName = names;
 		int dot = names.indexOf(".");
 		if (dot > 0)
 		{
-			root = names.substring(0, dot);
+			rootName = names.substring(0, dot);
 			names = names.substring (dot + 1);
 	  }
 	  else
 	  	names = "";
-		Element e = doc.getDocumentElement();
-		if (e == null)
+		if (root == null)
 		{
-		  e = doc.createElement(root);
-			doc.appendChild(e);
+		  root = doc.createElement(rootName);
+			doc.appendChild(root);
+			rootTag = rootName;
 		}
-		else if (!root.equals(e.getNodeName()))
+		else if (!rootName.equals(rootTag))
 		{
 			// Log.debug ("Root does not match " + names);
 			return null;
 		}
-		return addElement (e, names);
+		return addElement (root, names);
  }
     
   /**
@@ -446,7 +446,7 @@ public class XmlContent
    * @param n node to use
    * @return text value or null if the node doesn't exist
    */
-  private String getNodeValue (Node n)
+  protected String getValue (Node n)
   {
   	if (n == null)
   		return null;
@@ -462,17 +462,6 @@ public class XmlContent
   }
   
   /**
-   * Gets the "value" for names.  All text nodes for the named element
-   * are trimmed, concatenated by a space and returned as the value.
-   * @param names of value desired
-   * @return value of name or null if not found
-   */
-  public String getValue (String names)
-	{
-    return getNodeValue (getElement (names));
-	}
-  
-  /**
    * Gets the "value" for names from an element subtree.  
    * All text nodes for the named element
    * are trimmed, concatenated by a space and returned as the value.
@@ -480,10 +469,21 @@ public class XmlContent
    * @param names to match
    * @return value of name or null if not found
    */
-  public String getValue (Element e, String names)
+  protected String getValue (Element e, String names)
   {
-  	return getNodeValue (getElement (e, names));
+  	return getValue (getElement (e, names));
   }
+  
+  /**
+   * Gets the "value" for names.  All text nodes for the named element
+   * are trimmed, concatenated by a space and returned as the value.
+   * @param names of value desired
+   * @return value of name or null if not found
+   */
+  public String getValue (String names)
+	{
+    return getValue (getElement (names));
+	}
   
   /**
    * Get node value as an integer.
@@ -498,7 +498,7 @@ public class XmlContent
   /**
    * Get a list of all the child names and values for this name
    * @param name of node with values
-   * @return
+   * @return array of child node name/value pairs
    */
   public String[][] getChildren (String name)
   {
@@ -517,7 +517,7 @@ public class XmlContent
   			  i = names.get(n).intValue() + 1;
   			names.put(n, new Integer (i));
   			if (i > 0) n += "[" + i + "]";
-	  		String[] v = { n, getNodeValue (node)};
+	  		String[] v = { n, getValue (node)};
 	  		values.add (v);
   		}
   		node = node.getNextSibling();
@@ -569,7 +569,7 @@ public class XmlContent
    * @param value to set
    * @return true if successful
    */
-  public boolean setValue (Element e, String names, String value)
+  protected boolean setValue (Element e, String names, String value)
   {
   	if (value == null)
   		value = "";
@@ -614,7 +614,7 @@ public class XmlContent
    * Delete this element and all it's children
    * 
    * @param names element to delete
-   * @return
+   * @return true if successful
    */
   public boolean delete (String names)
   {
@@ -641,7 +641,9 @@ public class XmlContent
   	Element e = getElement (names);
   	if (e == null)
   		return null;
-  	return e.getAttribute(attrib);
+  	String a = e.getAttribute(attrib);
+  	if (a.length() == 0) a = null;
+  	return a;
   }
   
   /**
@@ -658,7 +660,7 @@ public class XmlContent
   	  return false;
   	if (value == null)
   		value = "";
-  	Element e = getElement (names);
+  	Element e = addElement (names);
   	if (e == null)
   		return false;
   	e.setAttribute(attrib, value);
@@ -672,7 +674,7 @@ public class XmlContent
    * @param names to count
    * @return number of matching elements
    */
-  public int getTagCount (Element e, String names)
+  protected int getTagCount (Element e, String names)
   {
   	int cnt = 0;
   	while (getElement (e, names + "[" + cnt + "]") != null)
@@ -724,7 +726,9 @@ public class XmlContent
   	if (parent == null)
   		return;
   	// boolean needindent = true;
-  	String indent = getIndent (tabsz * level);
+  	String indent = "";
+  	if (tabsz > 0)
+  		indent = getIndent (tabsz * level);
   	// Log.debug("beautifing element " + parent.getNodeName());
   	NodeList l = parent.getChildNodes();
   	// run through children 
@@ -756,17 +760,17 @@ public class XmlContent
 			if (n.getNodeType() != Node.TEXT_NODE)
 				beautify(n, tabsz, level + 1);
 		}
-		if (l.getLength () == 0)
+		if ((l.getLength () == 0) || (tabsz < 1))
 			return;
 		indent = getIndent (tabsz * --level);
-		Node n = doc.createTextNode(indent);
+		Node n = doc.createTextNode (indent);
 		parent.appendChild(n);
   }
   
   /**
    * Adjust text nodes between tags that don't have "values" to help beautify
    * the resulting XML.  This assumes that only text nodes that are single
-   * children actually have interesting data.  If the tabsz < 0 run everything
+   * children actually have interesting data.  If the tabsz <= 0 run everything
    * together (packed XML).
    * 
    * @param tabsz size of indent for each tag set
@@ -775,10 +779,10 @@ public class XmlContent
   {
   	if (doc == null)
   		return;
-		beautify (doc.getDocumentElement(), tabsz, 1);
+		beautify (root, tabsz, 1);
 		doc.normalize();
 		// note if transform indent needed in save above
-		beautify = (tabsz >= 0);
+		beautify = (tabsz > 0);
   }
   
   
@@ -815,5 +819,4 @@ public class XmlContent
   {
   	return toString (doc, false);
   }
-
 }

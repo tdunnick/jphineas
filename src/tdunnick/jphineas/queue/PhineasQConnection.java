@@ -2,6 +2,7 @@ package tdunnick.jphineas.queue;
 
 import java.util.*;
 
+import tdunnick.jphineas.config.XmlConfig;
 import tdunnick.jphineas.xml.*;
 
 public abstract class PhineasQConnection

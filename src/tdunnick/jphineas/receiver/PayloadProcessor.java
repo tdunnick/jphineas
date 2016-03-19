@@ -1,25 +1,54 @@
+/*
+ *  Copyright (c) 2015 Thomas Dunnick (https://mywebspace.wisc.edu/tdunnick/web)
+ *  
+ *  This file is part of jPhineas
+ *
+ *  jPhineas is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  jPhineas is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with jPhineas.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package tdunnick.jphineas.receiver;
 
+import java.io.File;
+
 import tdunnick.jphineas.util.*;
+import tdunnick.jphineas.config.ServiceConfig;
+import tdunnick.jphineas.ebxml.*;
 import tdunnick.jphineas.logging.*;
 import tdunnick.jphineas.queue.*;
-import tdunnick.jphineas.mime.MimeContent;
+import tdunnick.jphineas.mime.*;
 import tdunnick.jphineas.xml.*;
 
+/**
+ * This is the general purpose payload processor.
+ * 
+ * @author Thomas Dunnick tdunnick@wisc.edu
+ *
+ */
 public class PayloadProcessor extends ReceiverProcessor
 {
-  XmlConfig config = null;
+  ServiceConfig config = null;
   PhineasQ queue = null;
   
 	/**
 	 * Simply save the configuration
 	 * @param config to save
-	 * @see tdunnick.jphineas.receiver.ReceiverProcessor#configure(tdunnick.jphineas.xml.XmlConfig)
+	 * @see tdunnick.jphineas.receiver.ReceiverProcessor#configure(tdunnick.jphineas.config.ServiceConfig)
 	 */
-	protected boolean configure(XmlConfig config)
+	protected boolean configure(ServiceConfig config)
 	{
 		this.config = config;
-		String s = config.getValue("Queue");
+		String s = config.getQueue();
 		if (s == null)
 		{
 			Log.error ("Receiver Queue not specified");
@@ -42,32 +71,53 @@ public class PayloadProcessor extends ReceiverProcessor
 	 * @return mime package for the response
 	 * @see tdunnick.jphineas.receiver.ReceiverProcessor#process(tdunnick.jphineas.xml.SoapXml, tdunnick.jphineas.mime.MimeContent[])
 	 */
-	protected MimeContent process(SoapXml request, MimeContent[] parts)
+	protected MimeContent process (SoapXml request, MimeContent[] parts)
 	{
-		ReceiverSoapEnvelope env = new ReceiverSoapEnvelope (request);
-		EbXmlReceiverPackage pkg = new EbXmlReceiverPackage (config);
+		EbXmlResponse pkg = new EbXmlResponse (config);
 		//
 		PhineasQRow row = getRow (request);
-		// build a soap part
-		SoapXml soap = env.getSoapResponse("Acknowledgment", config.getValue ("Organization"));
-		// save our application responses
-		MimeContent[] appResponse = new MimeContent[parts.length];
+		// build a response package
+		MimeContent response = pkg.getMessagePackage (request, "Acknowledgment");
+		// build an acknowledgement part
+		EbXmlAppResponse rsp = new EbXmlAppResponse ();
+		// get decryption values
+		String password = config.getDecryptionPassword();
+		File cert = config.getDecryptionUnc();
+		if ((cert != null) && !cert.canRead())
+		{
+			Log.error ("Can't read certificate " + cert.getAbsolutePath());
+			cert = null;
+		}
+		// and our destination directory
+  	String dir = config.getPayloadDirectory();
 		// decode payloads and note their responses
 		for (int i = 1; i < parts.length; i++)
 		{
-			appResponse[i] = pkg.parsePayloadContainer(parts[i], row);
-			if (appResponse[i] != null)
-			  row.append ();
-		}
-		// build a response part
-		MimeContent response = pkg.getMessagePackage(soap);
-		// add the responses
-		for (int i = 1; i < appResponse.length; i++)
-		{
-			if (appResponse[i] != null)
+			rsp.reset ();
+			EbXmlAttachment a = new EbXmlAttachment (parts[i]);
+			File f = new File (dir + "/" + a.getName());
+	  	row.setPayloadName (a.getName());
+	  	row.setLocalFileName (f.getAbsolutePath());
+	  	boolean encrypted = a.isEncrypted();
+	  	row.setEncryption(encrypted ? "yes" : "no");
+			if (encrypted && (cert != null))
 			{
-				response.addMultiPart(appResponse[i]);
+			  if (!a.decrypt (cert, password))
+			  {
+		  		String s = "Could not decrypt payload for " + a.getName();
+		  		Log.error (s);
+	    	  rsp.set ("abnormal", s, "failure");
+			  }
 			}
+			if (!a.savePayload(f))
+	  	{
+	  		String s = "Could not save payload for " + a.getName();
+	  		Log.error (s);
+    	  rsp.set ("abnormal", s, "failure");
+	  	}
+			setRowResponse (row, rsp);
+			row.append ();
+			response.addMultiPart(rsp.get ());
 		}
 		return response;
 	}
@@ -92,5 +142,13 @@ public class PayloadProcessor extends ReceiverProcessor
 		row.setReceivedTime (s);
 		row.setLastUpdateTime (s);		
 		return row;
+	}
+	
+	boolean setRowResponse (PhineasQRow row, EbXmlAppResponse rsp)
+	{
+		row.setErrorCode (rsp.getStatus());
+		row.setErrorMessage (rsp.getError());
+		row.setApplicationStatus(rsp.getAppData());
+		return true;
 	}
 }

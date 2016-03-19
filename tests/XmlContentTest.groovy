@@ -130,8 +130,7 @@ class XmlContentTest extends GroovyTestCase
 
 	public final void testLoad()
 	{
-		assert xmlc.getDoc() != null : "Failed to load xml"
-		assert xmlc.createDoc() : "document creation failed"
+		assert xmlc.doc != null : "Failed to load xml"
 	}
 
 	public final void testSave()
@@ -139,6 +138,17 @@ class XmlContentTest extends GroovyTestCase
 		ByteArrayOutputStream outp = new ByteArrayOutputStream ();
 		assert xmlc.save(outp) : "Save failed"
 	}
+	
+	
+	public final void testGetRoot ()
+	{
+		assert xmlc.root != null : "no root"
+		String r = xmlc.rootTag
+		assert r != null : "no root name"
+		String expected = "EncryptedData";
+		assert r.equals (expected) : "root '" + r + " doesn't match " + expected
+	}
+
 	
 	public final void testGetValue()
 	{
@@ -163,7 +173,7 @@ class XmlContentTest extends GroovyTestCase
 	{
 	  assert xmlc.setAttribute (tag, "id", "foobar") : "couldn't set attribute"
 	  assert xmlc.getAttribute (tag, "id").equals("foobar") : "attribute didn't match"
-		assert xmlc.getAttribute (tag, "id2").length() == 0 : "returned invalid attribute"
+		assert xmlc.getAttribute (tag, "id2") == null : "returned invalid attribute"
 	}
 	
 	public final void testGetChildren ()
@@ -194,10 +204,6 @@ class XmlContentTest extends GroovyTestCase
 		xdump (xmlc)
 		def s = xmlc.toString()
 		assert s != null : "failed to save to string"
-		// println s
-		xmlc.beautify (0);
-		s = xmlc.toString(xmlc.getElement ("EncryptedData.KeyInfo"), true)
-		assert s != null : "failed to element save to string"
 		//println s
 	}
 	
@@ -207,7 +213,58 @@ class XmlContentTest extends GroovyTestCase
 		assert xml.load (cpa) : "can't load cpa"
 		xml.beautify (2);
 		String s = xml.toString().replace ("\r", "")
-		assert s.equals (cpa) : "Expected CPA not matched"
+		// println cpa + "\n" + s;
+		assert s.equals (cpa) : "Expected CPA not matched at " + diff (cpa, s)
+	}
+	
+	void testAddElement ()
+	{
+		XmlContent p = new XmlContent ();
+		def n = p.addElement("Root");
+		assert n != null : "Failed to add a root element";
+		assert p.addElement (n, "Child.Boy") != null : "Failed to add a child";
+		assert p.addElement("Root.Child[2].Girl") != null : "Failed to add a second child";
+		xdump (p);
+	}
+	
+	void testSetNewValue ()
+	{
+		XmlContent p = new XmlContent ();
+		assert p.setValue("Parent.Child.First", "Joe") : "Failed adding Joe"
+		assert p.setValue("Parent.Child[2].First", "Jane") : "Failed adding Jane"
+		assert p.setValue("Parent.Child.Second", "Josh") : "Failed adding Josh"
+		assert p.setValue("Parent.Child.First", "Josef") : "Failed updating Joe to Josef"
+		xdump (p);
+	}
+	
+	void testSetNewAttribute ()
+	{
+		XmlContent p = new XmlContent ();
+		assert p.setAttribute("Parent.Child.First", "name", "Joe") : "Failed adding name for Joe"
+		assert p.setAttribute("Parent.Child.First", "sex", "boy") : "Failed adding sex for Joe"
+		assert p.setAttribute("Parent.Child[2].First", "name", "Jane") : "Failed adding name for Jane"
+		assert p.setAttribute("Parent.Child[2].First", "sex", "girl") : "Failed adding sex for Jane"
+		assert p.setAttribute("Parent.Child.Second", "name", "Josh") : "Failed adding name for Joe"
+		assert p.setAttribute("Parent.Child.First", "name", "Josef") : "Failed adding name for Josef"
+		xdump (p);
+	}
+	
+
+	String diff (String s1, String s2)
+	{
+		int line = 1, li = 0;
+		for (int i = 0; i < s1.length(); i++)
+	  {
+			if (s1.charAt (i) == '\n') { line++; li = i + 1; }
+			if (s2.length() <= i)
+			  return ("line " + line + " shorter by " + (i - s2.length()));
+			if (s1.charAt (i) != s2.charAt (i))
+			  return ("line " + line + " differs at " + i + "\n" + s1.substring (li, i + 10) + 
+					"\n" + s2.substring (li, i + 10))
+		}
+		if (s2.length() > i)
+			  return ("line " + line + " longer by " + (s2.length() - i));
+		return ("no difference")
 	}
 	
 	void xdump (XmlContent x)

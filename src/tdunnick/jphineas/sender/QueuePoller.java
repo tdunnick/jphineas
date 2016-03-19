@@ -21,6 +21,8 @@ package tdunnick.jphineas.sender;
 
 import java.util.*;
 
+import tdunnick.jphineas.config.FolderConfig;
+import tdunnick.jphineas.config.SenderConfig;
 import tdunnick.jphineas.logging.*;
 import tdunnick.jphineas.queue.*;
 import tdunnick.jphineas.util.*;
@@ -39,10 +41,6 @@ public class QueuePoller extends Pthread
 {
 	/** polling interval */
 	int pollInterval = 30;
-  /** prefix for folder maps */
-  private static final String folderPrefix = "MapInfo.Map";
-  /** prefix for routes */
-  private static final String routePrefix = "RouteInfo.Route";
   /** list of send queues */
   ArrayList <PhineasQ> sendQ = null;
   /** list of active helper threads */
@@ -57,15 +55,17 @@ public class QueuePoller extends Pthread
 	 * and set of threads to service them.
 	 * @param config of the sender
 	 */
-	public QueuePoller (XmlConfig config)
+	public QueuePoller (SenderConfig config)
 	{
 		super ("QueuePoller");
-		pollInterval = config.getInt("PollInterval");
+		pollInterval = config.getPollInterval ();
 		// scan folder's for send queue, get a manager, and add them to our list
 		sendQ = new ArrayList <PhineasQ> ();
-		for (int i = 0; i < config.getTagCount(folderPrefix); i++)
+		int n = config.getMapCount();
+		while (n-- > 0)
 		{
-			String qname = config.getValue(folderPrefix + "[" + i + "].Queue");
+			FolderConfig cfg = config.getMap(n);
+			String qname = cfg.getQueue ();
 			PhineasQ sq = PhineasQManager.getInstance().getQueue(qname);
 			if (sq == null)
 			{
@@ -77,15 +77,16 @@ public class QueuePoller extends Pthread
 		}
   	// now make an entry for each route map found
 		routes = new HashMap <String, RouteInfo> ();
-  	for (int i = 0; i < config.getTagCount(routePrefix); i++)
+		n = config.getRouteCount();
+  	while (n-- > 0)
   	{
   		RouteInfo r = new RouteInfo ();
-  		if (!r.configure (config.copy(routePrefix + "[" + i + "]")))
+  		if (!r.configure (config.getRoute (n)))
   			continue;
   		routes.put (r.getName(), r);
 			Log.info("Added folder " + r.getName());
   	}
-  	int m = config.getInt("MaxThreads");
+  	int m = config.getMaxThreads ();
 		queue = new PriorityBlockingQ (m);
 		queueThreads = new QueueThread[m];
 		for (int i = 0; i < m; i++)

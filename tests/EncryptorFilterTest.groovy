@@ -25,6 +25,7 @@ import tdunnick.jphineas.logging.*;
 import tdunnick.jphineas.xml.*;
 import tdunnick.jphineas.filter.*;
 import tdunnick.jphineas.common.*
+import tdunnick.jphineas.config.XmlConfig;
 
 class EncryptorFilterTest extends GroovyTestCase
 {

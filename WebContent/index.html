@@ -112,7 +112,7 @@ table.navhelp td { vertical-align:top; }
       unzip to to the same location.
     </p>
     <p>
-      If the installation was succesful, you can access
+      If the installation was successful, you can access
       <b>jPhineas</b> from your browser. The domain and port for
       the URL will vary depending on your configuration, but the
       path will be <b>/jphineas</b>. For a bone stock jPhineas
@@ -267,7 +267,7 @@ table.navhelp td { vertical-align:top; }
     <p>
       JPhineas is typically configured from the console, but you
       may optionally edit configuration files directly. Any
-      changes require a <b>Restart</b> of the application before they
+      change require a <b>Restart</b> of the application before they
       will take effect. Configuration details can be found below.
     </p>
 		<p>
@@ -287,7 +287,7 @@ table.navhelp td { vertical-align:top; }
 			Neither operation has an effect until the next <b>Restart</b>.
 		</p>
     <p>
-      <b>JPhineas</b> is configured from five XML files,
+      <b>JPhineas</b> is configured from two XML files,
       typically located in a <b>config</b> directory.  File and
 			directory references from within a given configuration file
 			will be made relative to its <b>&lt;DefaultDirectory&gt;</b>,
@@ -308,19 +308,14 @@ table.navhelp td { vertical-align:top; }
     </p>
     <ul>
 		  <li>jPhineas.xml - the primary configuration file specified in
-			web.xml and used by all parts of <b>jPhineas</b>.  This references
-			the remaining configurations below.</li>
-      <li>Queues.xml - persistence including queue types, names,
-      and connection details.
-      </li>
-      <li>Sender.xml - sender general details, routes, and folder
-      maps
-      </li>
-      <li>Receiver.xml - receiver general details and
-      service/action maps
-      </li>
-      <li>Console.xml - console queues and links to other
-      configurations
+			web.xml and used by all parts of <b>jPhineas</b>. It includes
+			Sender, Receiver, and Queue relevant information as well as
+			shared resources (like logging). This also references
+			the Console configurations below.</li>
+      <li>Console.xml - this optional file controls the
+			appearence and function of the configuration page in the console.
+			You can think of it as "meta-configuration", describing what and how
+			values in the primary configuration can be adjusted in the console.
       </li>
     </ul>
     <p>		
@@ -333,14 +328,11 @@ jphineas/ - the root
     CPA/ - receiver CPA's
     revisions/ - previous configurations
     jPhineas.xml
-    Sender.xml
-    Receiver.xml
-    Queues.xml
     Console.xml
   CPA/ - exported Route CPA
   data/ - payload files
     incoming/ - received payloads
-    ack/ - outgoing acknowledgements
+    ack/ - outgoing acknowledgments
     outgoing/ - outgoing payload files
     processed/ - outgoing payloads that are queued
 	queues/ - files associated with the queue database
@@ -356,7 +348,7 @@ jphineas/ - the root
       <b>jphineas/WEB-INF/web.xml</b> (see installation above).
       Add (uncomment) the following to the end of <b>web.xml</b>
       just before the final <b>&lt;/web-app&gt;</b> tag. Note
-      that you will need to configure the appropriate application
+      that you will need to configure the application
       server <b>Realm</b> with the appropriate users and roles.
     </p>
     <pre>
@@ -471,7 +463,7 @@ for updates to take effect.
 				<p>
 				  The <b>Map</b> also indicates where files should go once they
 					have been added to a queue, and where replies get stored.  They
-					may optionally specifiy <b>Arguments</b> and/or a <b>Recipient</b>.
+					may optionally specify <b>Arguments</b> and/or a <b>Recipient</b>.
 					These may be required by the <b>Route</b> destination for
 					additional processing.
 				</p> 
@@ -483,15 +475,15 @@ for updates to take effect.
 		  As with the <b>Sender</b>, you will normally not need to modify
 			the default <b>General Settings</b> or <b>Logging</b>.  You do
 			need to make sure to save sender (client) CPA files to the 
-			<b>CPA Directory</b>.
+			receiver's <b>CPA Directory</b>.
 			<p>
 			You probably want to create additional <b>Services</b>.  The
 			standard default and Ping services are predefined.  Unlike
 			PHIN-MS, each service can include a unique <b>Directory</b>
 			to receive payload files.  This makes routing payloads
-			convienient.  Likewise, each service can have its own unique
+			convenient.  Likewise, each service can have its own unique
 			decryption parameters.  That allows you to optionally provide 
-			senders separate encryhption keys	for each service.
+			senders separate encryption keys	for each service.
 			</p>
     <h2>
       <a name="Queues" id="Queues">Queue Configuration</a>

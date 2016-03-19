@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<PatientRecord>    
+    <Name>John Doe</Name>    
+    <Account id="acct">123456</Account>    
+    <Visit date="10pm March 10, 2002">    
+	<Diagnosis>Broken second metacarpal</Diagnosis>    
+    </Visit>
+</PatientRecord>

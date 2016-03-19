@@ -19,6 +19,7 @@
 
 package tdunnick.jphineas.sender.ebxml;
 
+import tdunnick.jphineas.config.FolderConfig;
 import tdunnick.jphineas.logging.*;
 import tdunnick.jphineas.queue.*;
 import tdunnick.jphineas.util.*;
@@ -40,34 +41,35 @@ public class EbXmlQueue
    * @param row to add
    * @return true if successful
    */
-  public static boolean add (XmlConfig config, PhineasQRow row)
+  public static boolean add (FolderConfig config, PhineasQRow row)
   {
   	if ((config == null) || (row == null))
   	  return false;
 		long pid = ProcessID.getNewId();
 		// note our encryption if any
-		String encType = config.getValue ("Encryption.Type");
+		String encType = config.getEncryptionType();
 		if (encType == null)
 			encType = "none";
 		// add the entry
 		row.setMessageId ("FOLDERPOLLING-" + pid);
-		row.setRouteInfo (config.getValue ("Route"));
-		row.setService (config.getValue ("Service"));
-		row.setAction (config.getValue ("Action"));
-		row.setArguments (config.getValue ("Arguments"));
-		row.setMessageRecipient (config.getValue ("Recipient"));
+		row.setRouteInfo (config.getRoute());
+		row.setService (config.getService());
+		row.setAction (config.getAction());
+		row.setArguments (config.getArguments());
+		row.setMessageRecipient (config.getRecipient());
 		row.setSignature (null);
 		row.setEncryption ("yes");
 		if (encType.equalsIgnoreCase ("ldap"))
 		{
-			row.setPublicKeyLdapAddress (config.getValue ("Encryption.Unc"));
-			row.setPublicKeyLdapDn (config.getValue ("Encryption.Dn"));
-			row.setPublicKeyLdapBaseDn (config.getValue ("Encryption.BaseDn"));
+			row.setPublicKeyLdapAddress (config.getEncryptionUnc());
+			row.setPublicKeyLdapDn (config.getEncryptionDn());
+			row.setPublicKeyLdapBaseDn (config.getEncryptionBaseDn());
 			// TODO id and password for secured LDAPs
 		}
 		else if (encType.equalsIgnoreCase ("certificate"))
 		{
-		  row.setCertificateUrl (config.getFile("Encryption.Unc").getAbsolutePath());
+			// TODO make sure this is an absolute path???
+		  row.setCertificateUrl (config.getEncryptionUnc());
 		}
 		else if (encType.equalsIgnoreCase ("pbe"))
 		{
@@ -101,7 +103,7 @@ public class EbXmlQueue
   	String xml = "<Ping><Route>" + route + "</Route>"
   	  + "<Service>urn:oasis:names:tc:ebxml-msg:service</Service>"
   	  + "<Action>Ping</Action></Ping>";
-  	XmlConfig config = new XmlConfig ();
+  	FolderConfig config = new FolderConfig ();
   	config.load(xml);
   	return add (config, queue.newRow());
   }

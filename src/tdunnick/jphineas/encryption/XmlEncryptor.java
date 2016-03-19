@@ -48,11 +48,11 @@ public class XmlEncryptor
 	 * @param payload data to encrypt
 	 * @return XML wrapped payload
 	 */
-	public String encryptPayload (String path, String passwd, 
-			StringBuffer dn, byte[] payload)
+	public String encryptPayload (String path, String passwd, StringBuffer dn, byte[] payload)
 	{
 		if ((path == null) || (payload == null))
 			return null;
+		Log.debug ("encryption path=" + path);
 		if (dn == null)
 			dn = new StringBuffer ();
 		EncryptionXml xml = new EncryptionXml ();
@@ -96,13 +96,14 @@ public class XmlEncryptor
 	}
 
 	/**
-	 * Decrypt a payload wrapped in XML
+	 * Decrypt a payload wrapped in XML.  If the payload is not XML encrypted
+	 * we don't do anything and just return the payload.
 	 * 
 	 * @param path to decryption keystore
 	 * @param storepass to keystore
 	 * @param keypass and entry
-	 * @param payload wrapped in XML
-	 * @return binary payload data
+	 * @param payload string, optionally encrypted in XML
+	 * @return binary payload data or null if it fails
 	 */
 	public byte[] decryptPayload (String path, String storepass, 
 			String keypass, String payload)

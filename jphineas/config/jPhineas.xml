@@ -1,32 +1,336 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <jPhineas>
+	<!--
+		Default directory for file or folder references, default to
+		configuration parent
+	-->
+	<DefaultDirectory></DefaultDirectory>
+	<!-- our EbXML party ID -->
+	<HostId>jPhineas</HostId>
+	<!-- our host domain -->
+	<Domain />
+	<!-- our organization name -->
+	<Organization>tdunnick.wisc.edu</Organization>
   <!-- logging -->
   <Log>
     <!-- identifies the context for this log -->
     <LogId>jPhineas</LogId>
     <!-- full path to log file, leave empty for stdout -->
-    <LogName/>
+    <LogName />
     <!-- amount of detail found in log -->
-    <LogLevel>debug</LogLevel>
+    <LogLevel>info</LogLevel>
     <!-- enable source locations in log -->
-    <LogLocal>true</LogLocal>
+    <LogLocal>false</LogLocal>
     <!-- number of days to keep a log, leave empty for no rotation -->
-    <LogDays/>
+    <LogDays />
   </Log>
-  <!-- Default directory for file or folder references, default to configuration parent -->
-  <DefaultDirectory></DefaultDirectory>
-  <!-- our EbXML party ID -->
-  <HostId>jPhineas</HostId>
-  <!-- our host domain -->
-  <Domain/>
-  <!-- our organization name -->
-  <Organization>tdunnick.wisc.edu</Organization>
-  <!-- sender configuration -->
-  <Sender>config/Sender.xml</Sender>
-  <!-- receiver configuration -->
-  <Receiver>config/Receiver.xml</Receiver>
-  <!-- console configuration -->
-  <Console>config/Console.xml</Console>
-  <!-- queue configuration -->
-  <Queues>config/Queues.xml</Queues>
+	<!-- sender configuration -->
+	<Sender>
+		<!-- logging -->
+		<Log>
+			<!-- identifies the context for this log -->
+			<LogId>Sender</LogId>
+			<!-- full path to log file -->
+			<LogName />
+			<!-- amount of detail found in log -->
+			<LogLevel>info</LogLevel>
+			<!-- enable source locations in log -->
+			<LogLocal>false</LogLocal>
+			<!-- number of days to keep a log -->
+			<LogDays />
+		</Log>
+		<!-- Default directory for file or folder references -->
+		<DefaultDirectory></DefaultDirectory>
+		<!-- a directory to temporarily stash files queued for transmission -->
+		<QueueDirectory>tmp</QueueDirectory>
+		<!-- location for exported CPA's -->
+		<CpaDirectory>CPA</CpaDirectory>
+		<!-- second between map, queue, or other polling -->
+		<PollInterval>10</PollInterval>
+		<!-- maximum number of sender threads -->
+		<MaxThreads />
+		<!-- trust store and password for SSL connections -->
+		<TrustStore>security/cacerts</TrustStore>
+		<TrustStorePassword>123456</TrustStorePassword>
+		<!-- 
+    Routes identify processing for queue records.
+   -->
+		<RouteInfo>
+			<Route>
+				<Name>PHINMS270</Name>
+				<Processor>ebXML</Processor>
+				<!--
+					the following is specific to ebXML, but should fit processor
+					requirements
+				-->
+				<PartyId>phinms270sp1</PartyId>
+				<Cpa>phinms270sp1.jPhineas</Cpa>
+				<Host>localhost</Host>
+				<Path>/receiver/receivefile</Path>
+				<Port>5089</Port>
+				<Protocol>HTTPS</Protocol>
+				<Timeout>30</Timeout>
+				<Retry>2</Retry>
+				<Authentication>
+					<!--  none, basic, clientcert  -->
+					<Type>clientcert</Type>
+					<Id />
+					<Password>123456</Password>
+					<Unc>security/sslcert.pfx</Unc>
+					<BaseDn />
+					<Dn />
+				</Authentication>
+			</Route>
+      <ProcessorInfo>
+        <Processor>
+          <Name>ebXML</Name>
+          <Class>tdunnick.jphineas.sender.ebxml.EbXmlRouteProcessor</Class>
+        </Processor>
+      </ProcessorInfo>
+		</RouteInfo>
+		<!--
+			FolderInfo direct processing of sender files. Each Folder can have
+			it's own processor. The archtype is for EbXML payload queueing, but
+			virtually anything can be done as long as candidate files from Folder
+			are consumed.
+		-->
+		<MapInfo>
+			<Map>
+				<Name>TestFolder</Name>
+				<Source>data/outgoing</Source>
+				<Processor>ebXML</Processor>
+				<!-- the rest is processor specific, for EbXmlFolderProcessor... -->
+				<Processed>data/processed</Processed>
+				<Acknowledged>data/ack</Acknowledged>
+				<Filter />
+				<Route>PHINMS270</Route>
+				<Service>defaultservice</Service>
+				<Action>defaultaction</Action>
+				<Arguments />
+				<Recipient />
+				<Encryption>
+					<!--  none, certificate, ldap, pbe  -->
+					<Type>certificate</Type>
+					<Id />
+					<Password />
+					<Unc>security/sslcert.pem</Unc>
+				</Encryption>
+				<Queue>HsqlSendQ</Queue>
+			</Map>
+	    <ProcessorInfo>
+	      <Processor>
+	        <Name>ebXML</Name>
+	        <Class>tdunnick.jphineas.sender.ebxml.EbXmlFolderProcessor</Class>
+	      </Processor>
+	    </ProcessorInfo>
+	    <FilterInfo>
+	      <Filter>
+	       <Name>None</Name>
+	      </Filter>
+	      <Filter>
+	        <Name>Decrypt</Name>
+	        <Class>tdunnick.jphineas.filter.DecryptorInputFilter</Class>
+	      </Filter>
+	      <Filter>
+	        <Name>Encrypt</Name>
+	        <Class>tdunnick.jphineas.filter.EncryptorInputFilter</Class>
+	      </Filter>
+	    </FilterInfo>
+    </MapInfo>
+	</Sender>
+	<!-- receiver configuration -->
+	<Receiver>
+		<!-- logging -->
+		<Log>
+			<!-- identifies the context for this log -->
+			<LogId>Receiver</LogId>
+			<!-- full path to log file -->
+			<LogName />
+			<!-- amount of detail found in log -->
+			<LogLevel>info</LogLevel>
+			<!-- enable source locations in log -->
+			<LogLocal>false</LogLocal>
+			<!-- number of days to keep a log -->
+			<LogDays />
+		</Log>
+		<!-- Default directory for file or folder references -->
+		<DefaultDirectory></DefaultDirectory>
+		<!-- a directory to receive payloads -->
+		<PayloadDirectory>data/incoming</PayloadDirectory>
+		<!-- a directory of client CPA's -->
+		<CpaDirectory>config/CPA</CpaDirectory>
+		<!-- ad directory of cached replies -->
+		<CacheDirectory>replies</CacheDirectory>
+		<!-- the services provided -->
+		<ServiceInfo>
+			<Service>
+				<Name>default</Name>
+				<Service>defaultservice</Service>
+				<Action>defaultaction</Action>
+				<Processor>File</Processor>
+				<Queue>HsqlReceiveQ</Queue>
+				<Filter />
+				<Decryption>
+					<Type>certificate</Type>
+					<Id />
+					<Password>123456</Password>
+					<Unc>security/sslcert.pfx</Unc>
+				</Decryption>
+			</Service>
+			<Service>
+				<Name>Ping</Name>
+				<Service>urn:oasis:names:tc:ebxml-msg:service</Service>
+				<Action>Ping</Action>
+				<Processor>Ping</Processor>
+				<Filter />
+				<Queue>HsqlReceiveQ</Queue>
+				<Decryption>
+					<Id />
+					<Type>none</Type>
+					<Unc />
+					<Password />
+				</Decryption>
+				<Directory />
+			</Service>
+		  <ProcessorInfo>
+		    <Processor>
+		      <Name>File</Name>
+		      <Class>tdunnick.jphineas.receiver.PayloadProcessor</Class>
+		    </Processor>
+		    <Processor>
+		      <Name>Ping</Name>
+		      <Class>tdunnick.jphineas.receiver.PingProcessor</Class>
+		    </Processor>
+		    <Processor>
+		      <Name>Servlet</Name>
+		      <Class>tdunnick.jphineas.receiver.ServletProcessor</Class>
+		    </Processor>
+		  </ProcessorInfo>
+	    <FilterInfo>
+	      <Filter>
+	       <Name>None</Name>
+	      </Filter>
+	      <Filter>
+	        <Name>Decrypt</Name>
+	        <Class>tdunnick.jphineas.filter.DecryptorOutputFilter</Class>
+	      </Filter>
+	      <Filter>
+	        <Name>Encrypt</Name>
+	        <Class>tdunnick.jphineas.filter.EncryptorOutputFilter</Class>
+	      </Filter>
+	    </FilterInfo>
+	   </ServiceInfo>
+	</Receiver>
+	<!-- queue configuration -->
+	<Queues>
+		<TypeInfo>
+			<!--
+				for queue types, the field id is used internally, and the field
+				value should match the field label in the data row
+			-->
+			<Type>
+				<Name>EbXmlSndQ</Name>
+				<Field id="RECORDID">RECORDID</Field>
+				<Field id="MESSAGEID">MESSAGEID</Field>
+				<Field id="PAYLOADFILE">PAYLOADFILE</Field>
+				<Field id="DESTINATIONFILENAME">DESTINATIONFILENAME</Field>
+				<Field id="ROUTEINFO">ROUTEINFO</Field>
+				<Field id="SERVICE">SERVICE</Field>
+				<Field id="ACTION">ACTION</Field>
+				<Field id="ARGUMENTS">ARGUMENTS</Field>
+				<Field id="MESSAGERECIPIENT">MESSAGERECIPIENT</Field>
+				<Field id="MESSAGECREATIONTIME">MESSAGECREATIONTIME</Field>
+				<Field id="ENCRYPTION">ENCRYPTION</Field>
+				<Field id="SIGNATURE">SIGNATURE</Field>
+				<Field id="PUBLICKEYLDAPADDRESS">PUBLICKEYLDAPADDRESS</Field>
+				<Field id="PUBLICKEYLDAPBASEDN">PUBLICKEYLDAPBASEDN</Field>
+				<Field id="PUBLICKEYLDAPDN">PUBLICKEYLDAPDN</Field>
+				<Field id="CERTIFICATEURL">CERTIFICATEURL</Field>
+				<Field id="PROCESSINGSTATUS">PROCESSINGSTATUS</Field>
+				<Field id="TRANSPORTSTATUS">TRANSPORTSTATUS</Field>
+				<Field id="TRANSPORTERRORCODE">TRANSPORTERRORCODE</Field>
+				<Field id="APPLICATIONSTATUS">APPLICATIONSTATUS</Field>
+				<Field id="APPLICATIONERRORCODE">APPLICATIONERRORCODE</Field>
+				<Field id="APPLICATIONRESPONSE">APPLICATIONRESPONSE</Field>
+				<Field id="MESSAGESENTTIME">MESSAGESENTTIME</Field>
+				<Field id="MESSAGERECEIVEDTIME">MESSAGERECEIVEDTIME</Field>
+				<Field id="RESPONSEMESSAGEID">RESPONSEMESSAGEID</Field>
+				<Field id="RESPONSEARGUMENTS">RESPONSEARGUMENTS</Field>
+				<Field id="RESPONSELOCALFILE">RESPONSELOCALFILE</Field>
+				<Field id="RESPONSEFILENAME">RESPONSEFILENAME</Field>
+				<Field id="RESPONSEMESSAGEORIGIN">RESPONSEMESSAGEORIGIN</Field>
+				<Field id="RESPONSEMESSAGESIGNATURE">RESPONSEMESSAGESIGNATURE</Field>
+				<Field id="PRIORITY">PRIORITY</Field>
+			</Type>
+			<Type>
+				<Name>EbXmlRcvQ</Name>
+				<Field id="RECORDID">RECORDID</Field>
+				<Field id="MESSAGEID">MESSAGEID</Field>
+				<Field id="PAYLOADNAME">PAYLOADNAME</Field>
+				<Field id="LOCALFILENAME">LOCALFILENAME</Field>
+				<Field id="SERVICE">SERVICE</Field>
+				<Field id="ACTION">ACTION</Field>
+				<Field id="ARGUMENTS">ARGUMENTS</Field>
+				<Field id="FROMPARTYID">FROMPARTYID</Field>
+				<Field id="MESSAGERECIPIENT">MESSAGERECIPIENT</Field>
+				<Field id="ERRORCODE">ERRORCODE</Field>
+				<Field id="ERRORMESSAGE">ERRORMESSAGE</Field>
+				<Field id="PROCESSINGSTATUS">PROCESSINGSTATUS</Field>
+				<Field id="APPLICATIONSTATUS">APPLICATIONSTATUS</Field>
+				<Field id="ENCRYPTION">ENCRYPTION</Field>
+				<Field id="RECEIVEDTIME">RECEIVEDTIME</Field>
+				<Field id="LASTUPDATETIME">LASTUPDATETIME</Field>
+				<Field id="PROCESSID">PROCESSID</Field>
+			</Type>
+		</TypeInfo>
+		<ConnectionInfo>
+			<Connection>
+				<Name>HsqlInProcess</Name>
+				<Class>tdunnick.jphineas.queue.PhineasJDBCQ</Class>
+				<Id>sa</Id>
+				<Password>PHINEAS123</Password>
+				<Unc>jdbc:hsqldb:file:queues/hsqldb</Unc>
+				<Driver>org.hsqldb.jdbcDriver</Driver>
+				<Flush>checkpoint</Flush>
+			</Connection>
+			<Connection>
+				<Name>MemQ</Name>
+				<Class>tdunnick.jphineas.queue.PhineasMemQ</Class>
+				<Id />
+				<Password />
+				<Unc>queues/memq</Unc>
+				<Driver />
+				<Flush />
+			</Connection>
+		</ConnectionInfo>
+		<QueueInfo>
+			<Queue>
+				<Name>MemSendQ</Name>
+				<Type>EbXmlSndQ</Type>
+				<Connection>MemQ</Connection>
+				<Table>TransportQ</Table>
+			</Queue>
+			<Queue>
+				<Name>MemReceiveQ</Name>
+				<Type>EbXmlRcvQ</Type>
+				<Connection>MemQ</Connection>
+				<Table>ReceiveQ</Table>
+			</Queue>
+			<Queue>
+				<Name>HsqlSendQ</Name>
+				<Type>EbXmlSndQ</Type>
+				<Connection>HsqlInProcess</Connection>
+				<Table>SendQ</Table>
+			</Queue>
+			<Queue>
+				<Name>HsqlReceiveQ</Name>
+				<Type>EbXmlRcvQ</Type>
+				<Connection>HsqlInProcess</Connection>
+				<Table>ReceiveQ</Table>
+			</Queue>
+			<DefaultDirectory></DefaultDirectory>
+		</QueueInfo>
+	</Queues>
+	<!-- console configuration -->
+	<Console>config/Console.xml</Console>
 </jPhineas>

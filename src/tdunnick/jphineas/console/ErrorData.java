@@ -34,12 +34,12 @@ public class ErrorData
 	  
   private boolean getLogErrors ()
   {
-  	HashMap <String, LogConfig> configs = Log.getLoggers();
+  	HashMap <String, LogContext> configs = Log.getLoggers();
   	Iterator <String> it = configs.keySet().iterator();
   	while (it.hasNext())
   	{
   		String k = it.next();
-  		LogConfig cfg = configs.get (k);
+  		LogContext cfg = configs.get (k);
 	  	ArrayList <String> log = cfg.getLog();
 	  	for (int i = 0; i < log.size(); i++)
 	  	{

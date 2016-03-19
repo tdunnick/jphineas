@@ -90,7 +90,7 @@
             </td>
             <td>
               <a href="${pageContext.request.contextPath}/console/logs.html">
-              <img alt="show configuration" src="${pageContext.request.contextPath}/images/loop.gif"></a>
+              <img alt="show logs" src="${pageContext.request.contextPath}/images/loop.gif"></a>
             </td>
             <td>
               <a href="${pageContext.request.contextPath}/console/config.html">

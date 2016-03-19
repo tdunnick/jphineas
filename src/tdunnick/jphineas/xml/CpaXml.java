@@ -19,6 +19,8 @@
 
 package tdunnick.jphineas.xml;
 
+import tdunnick.jphineas.config.XmlConfig;
+
 /**
  * manages Communication Protocol Agreement (CPA)
  * 
@@ -137,29 +139,12 @@ public class CpaXml extends XmlContent
 	public static final String certauth = security + ".tp:clientCertAuth";
 	
 	/**
-	 * create a blank CPA
-	 */
-	public CpaXml ()
-	{
-		super (template);
-	}
-	
-	/**
-	 * load this CPA
-	 * @param cpa to load
-	 */
-	public CpaXml (String cpa)
-	{
-		super (cpa);
-	}
-	
-	/**
 	 * create a CPA from a Sender Route
 	 * @param route
 	 */
 	public CpaXml (XmlConfig route)
 	{
-		super (template);
+		load (template);
 		setValue (sender, route.getValue("HostId"));
 		setValue (receiver, route.getValue("PartyId"));
 		String s = route.getValue("Host") + ":" + route.getValue("Port") 
@@ -197,11 +182,11 @@ public class CpaXml extends XmlContent
 	}
 	
 	/**
-	 * Get the preferred name for this CPA
+	 * Get the preferred name for this CPA.  Note this may vary from that set in the Route!
 	 * @return preferred name
 	 */
 	public String getCpaName ()
 	{
-		return getValue (sender) + "." + getValue (receiver);
+		return getValue (receiver) + "." + getValue (sender);
 	}
 }

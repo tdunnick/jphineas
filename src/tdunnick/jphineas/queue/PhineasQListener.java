@@ -23,8 +23,8 @@ import java.io.File;
 
 import javax.servlet.*;
 
+import tdunnick.jphineas.config.XmlConfig;
 import tdunnick.jphineas.logging.Log;
-import tdunnick.jphineas.xml.XmlConfig;
 
 
 /**
@@ -52,14 +52,7 @@ public class PhineasQListener implements ServletContextListener
 	{
 		ServletContext ctx = ev.getServletContext ();
 		String configname = ctx.getInitParameter("Configuration");
-	  XmlConfig master = new XmlConfig ();
-		if (!master.load(new File (configname)))
-		{
-			Log.error ("failed loading " + configname);
-			return;
-		}
-		File f = master.getFile("Queues");
-		PhineasQManager.getInstance().configure(f.getAbsolutePath());
+		PhineasQManager.getInstance().configure(configname);
 	}
 
 }

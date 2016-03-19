@@ -22,6 +22,8 @@ package tdunnick.jphineas.queue;
 import java.util.*;
 import java.io.*;
 
+import tdunnick.jphineas.config.LogConfig;
+import tdunnick.jphineas.config.XmlConfig;
 import tdunnick.jphineas.logging.*;
 import tdunnick.jphineas.xml.*;
 /**
@@ -46,6 +48,8 @@ public class PhineasQManager
   private HashMap <String,PhineasQConnection> connections = new HashMap <String,PhineasQConnection>();
   /** types */
   private HashMap <String,PhineasQType> types = new HashMap <String,PhineasQType> ();
+  /** our logging context */
+  String logId = null;
   
   /**
    * Singleton constructor.
@@ -85,7 +89,7 @@ public class PhineasQManager
 		// if no name given we are done
   	if (name == null)
   	{
-  		Log.error("Missing Queue configuration");
+  		Log.error("Missing configuration");
   		return (false);
   	}
   	synchronized (lock)
@@ -96,6 +100,8 @@ public class PhineasQManager
 	  		Log.error("Couldn't load queue configuration " + name);
 	  		return false;
 	  	}
+	  	config = config.copy ("Queues");
+			logId = Log.configure ((LogConfig) config.copy (new LogConfig (), "Log"));
 	  	// load our type configurations
 	  	int n = config.getTagCount("TypeInfo.Type");
 	  	if (n == 0)
@@ -110,6 +116,7 @@ public class PhineasQManager
 	  		if (types.containsKey (s))
 	  			continue;
 	  		types.put (s, new PhineasQType (c));
+	  		// Log.debug ("added type " + s + " with " + c.getTagCount("Field") + " fields");
 	  	}
 	  	// load connections
 	  	n = config.getTagCount("ConnectionInfo.Connection");
@@ -156,9 +163,9 @@ public class PhineasQManager
 				addQueue (config.copy("QueueInfo.Queue[" + i + "]"));
 			}
 			Log.debug("Queue configuation: " 
-					+ config.getTagCount("Type") + " types, "
-					+ config.getTagCount("Connection") + " connections, "
-					+ config.getTagCount("Queue") + " queues");
+					+ config.getTagCount("TypeInfo.Type") + " types, "
+					+ config.getTagCount("ConnectionInfo.Connection") + " connections, "
+					+ config.getTagCount("QueueInfo.Queue") + " queues");
 			configName = name;
 	  	return true;
   	}

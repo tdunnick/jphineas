@@ -23,6 +23,7 @@ import java.io.*;
 import java.util.*;
 
 import tdunnick.jphineas.xml.*;
+import tdunnick.jphineas.config.SenderConfig;
 import tdunnick.jphineas.logging.*;
 import tdunnick.jphineas.util.*;
 
@@ -56,17 +57,18 @@ public class FolderPoller extends Pthread
    * 
    * @param config containing the maps
    */
-  public FolderPoller (XmlConfig config)
+  public FolderPoller (SenderConfig config)
   {
   	super ("FolderPoller");
   	// how often we check...
   	pollInterval = config.getInt("PollInterval");
   	folders = new ArrayList <FolderInfo> ();
   	// now make an entry for each map found
-  	for (int i = 0; i < config.getTagCount (mapPrefix); i++)
+  	int n = config.getMapCount ();
+  	while (n-- > 0)
   	{
   		FolderInfo f = new FolderInfo ();
-  		if (!f.configure (config.copy(mapPrefix + "[" + i + "]")))
+  		if (!f.configure (config.getMap (n)))
   			continue;
   		folders.add(f);
 			Log.info("Added folder " + f.getName());
@@ -99,7 +101,7 @@ public class FolderPoller extends Pthread
 	 */
 	private int pollFolder (FolderInfo folder)
 	{
-		// Log.debug("Polling " + dir.getPath());
+		// Log.debug("Polling " + folder.getFolder().getAbsolutePath());
 		File[] files = folder.getFolder().listFiles();
 		if (files == null)
 		  return (0);
@@ -111,7 +113,10 @@ public class FolderPoller extends Pthread
 				continue;			
 			// submit this file for processing
 			Log.debug("submitting " + f.getPath());
-			if (folder.getProcessor().process (f))
+			FolderProcessor p = folder.getProcessor();
+			if (p == null)
+				Log.error("Can't get folder processor for " + folder.getName());
+			else if (p.process (f))
 				n++;
 		}
 		return n;

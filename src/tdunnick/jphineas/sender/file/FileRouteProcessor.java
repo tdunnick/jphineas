@@ -21,6 +21,7 @@ package tdunnick.jphineas.sender.file;
 
 import java.io.*;
 
+import tdunnick.jphineas.config.RouteConfig;
 import tdunnick.jphineas.logging.*;
 import tdunnick.jphineas.queue.*;
 import tdunnick.jphineas.sender.*;
@@ -31,10 +32,10 @@ public class FileRouteProcessor extends RouteProcessor
 	private String host = null;
 	private String path = null;
 	
-	public boolean configure (XmlConfig config)
+	public boolean configure (RouteConfig config)
 	{
-		host = config.getValue("Host");
-		path = config.getValue("Path");
+		host = config.getHost();
+		path = config.getPath();
 		return true;
 	}
 	

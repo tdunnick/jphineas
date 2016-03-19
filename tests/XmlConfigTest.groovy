@@ -21,6 +21,8 @@
 
 import groovy.util.GroovyTestCase;
 import java.io.*;
+
+import tdunnick.jphineas.config.XmlConfig;
 import tdunnick.jphineas.xml.*;
 
 class XmlConfigTest extends GroovyTestCase
@@ -52,7 +54,7 @@ class XmlConfigTest extends GroovyTestCase
 	protected void setUp () throws Exception
 	{
 		xmlc = new XmlConfig ();
-		xmlc.load (xml);
+		assert xmlc.load (xml) : "failed loading xml!";
 	}
 	protected void tearDown() throws Exception
 	{
@@ -62,24 +64,25 @@ class XmlConfigTest extends GroovyTestCase
 	public final void testGetValue()
 	{
 		// println "'" + xmlc.getValue(tag) + "'"
-		assert xmlc.getValue (tag).equals("key") : "tag value not retrieved"
+		assert xmlc.getValue (tag).equals("key") : tag + " value not retrieved"
 	}
 
 	public final void testSetValue ()
 	{
 		xmlc.setValue (tag, "foobar");
-		assert xmlc.getString(tag).equals("foobar") : "tag value not set"
+		assert xmlc.getString(tag).equals("foobar") : tag + " value not set"
 		xmlc.setValue (tag + "[3]", "the third")
-		assert xmlc.getString(tag + "[3]").equals("the third") : "index value not set"
-		assert xmlc.getString (tag + "[0]").equals("foobar") : "zero index corrupted"
+		assert xmlc.getString(tag + "[3]").equals("the third") : tag + "[3] value not set"
+		assert xmlc.getString (tag + "[0]").equals("foobar") : tag + "[0] index corrupted"
 		// println "'" + xmlc.getValue(tag + "[1]") + "'"
-		assert xmlc.getValue(tag + "[1]") == null : "wrong length for empty tag"
-		assert xmlc.getTagCount(tag) == 4 : "incorrect tag count"
+		assert xmlc.getValue(tag + "[1]") == null : tag + "[1] wrong length for empty tag"
+		// println xmlc.toString();
+		assert xmlc.getTagCount(tag) == 4 : tag + " incorrect tag count got " + xmlc.getTagCount(tag)
 	}
 	
 	public final void testAttribute ()
 	{
-	  assert xmlc.getAttribute ("KeyInfo", "xmlns") != null : "attribute Id not found"
+	  assert xmlc.getAttribute ("KeyInfo", "xmlns") != null : "attribute xmlns not found"
 	  assert xmlc.getAttribute ("KeyInfo", "xmlns").equals("http://www.w3.org/2000/09/xmldsig#") : "attribute Id didn't match"
 		assert xmlc.getAttribute (tag, "id2") == null : "returned invalid attribute"
 	}
@@ -92,6 +95,27 @@ class XmlConfigTest extends GroovyTestCase
 		xmlc.load (f);
 		assert xmlc.getValue(xtag).equals("FROMPARTYID") : "didn't match value"
 		assert xmlc.getAttribute(xtag, "eb:type").equals("zz") : "didn't match attribute"
+	}
+	
+	public final void testDfltDir ()
+	{
+		String xname = "examples/soap_defaults.xml"
+		File f = new File (xname);
+		xmlc.load (f);
+		String s = xmlc.getValue (xmlc.DEFAULTDIR);
+		assert s != null : "failed get default directory";
+		// println (s);	
+	}
+	
+	public final void testCopy ()
+	{
+		String xname = "examples/soap_defaults.xml"
+		xmlc.init (new File (xname));
+		assert xmlc.getValue (xmlc.DEFAULTDIR) != null : "failed get default directory";
+		XmlConfig n = xmlc.copy ("KeyInfo.EncryptedKey.KeyInfo")
+		assert n != null : "Failed to create copy"
+		assert n.getValue ("KeyName").equals("key") : "KeyName not found"
+		assert n.findValue (xmlc.DEFAULTDIR).equals (xmlc.getValue (xmlc.DEFAULTDIR)) : "copy defaultdir wrong"
 	}
 	
 }

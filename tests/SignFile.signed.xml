@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><PatientRecord>    
+    <Name>John Doe</Name>    
+    <Account id="acct">123456</Account>    
+    <Visit date="10pm March 10, 2002">    
+	<Diagnosis>Broken second metacarpal</Diagnosis>    
+    </Visit>
+<Signature xmlns="http://www.w3.org/2000/09/xmldsig#"><SignedInfo><CanonicalizationMethod Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315#WithComments"/><SignatureMethod Algorithm="http://www.w3.org/2000/09/xmldsig#rsa-sha1"/><Reference URI=""><Transforms><Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature"/></Transforms><DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1"/><DigestValue>R016FadxKMVB12bBafh3zUUTQys=</DigestValue></Reference></SignedInfo><SignatureValue>niO/oCjf29rQ1KPTvvFyfocCpJvMDB6P30Rf+bPMFJ21km0CgBMNvlOsulq9GE5gaXndDHPcE8ER
+VuRetUljbj37eHX6yYFkuEKn6QiF+obQyJKL2x6n8YxIrHv6vEKbEACN+ygtAguGfbI0tDpI0hEn
+0TjuTJUoehafEdh0npE=</SignatureValue><KeyInfo><KeyValue><RSAKeyValue><Modulus>0bmSwWXcoHdJNyY6hByYsgwKB8H8lIxK1D6wBPgpvDfLN0xq9w8ZWQOPDTpCG/Ikq0Xa4WKXKeUI
+kjf5KtT4xBSnc2RQlTl22qJXVSHf5Z5eqe8RVH68rmLBaUqLR3K6KopaDro+eSGhZN2zOqfFLijZ
+zMV7DnZL5gibBX4IdJM=</Modulus><Exponent>AQAB</Exponent></RSAKeyValue></KeyValue></KeyInfo></Signature></PatientRecord>

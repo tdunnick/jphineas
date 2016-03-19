@@ -22,9 +22,9 @@ package tdunnick.jphineas.queue;
 import java.util.*;
 import java.io.*;
 
+import tdunnick.jphineas.config.XmlConfig;
 import tdunnick.jphineas.logging.*;
 import tdunnick.jphineas.util.DateFmt;
-import tdunnick.jphineas.xml.XmlConfig;
 
 /**
  * An in memory implementation of a queue with file as backing (persistence)

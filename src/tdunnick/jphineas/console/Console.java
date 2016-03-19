@@ -28,6 +28,9 @@ import javax.servlet.http.*;
 import tdunnick.jphineas.queue.*;
 import tdunnick.jphineas.receiver.Receiver;
 import tdunnick.jphineas.sender.Sender;
+import tdunnick.jphineas.config.LogConfig;
+import tdunnick.jphineas.config.PhineasConfig;
+import tdunnick.jphineas.config.XmlConfig;
 import tdunnick.jphineas.console.config.*;
 import tdunnick.jphineas.console.queue.*;
 import tdunnick.jphineas.console.logs.*;
@@ -50,7 +53,6 @@ import tdunnick.jphineas.xml.*;
 public class Console extends HttpServlet
 {
 	private static final long serialVersionUID = 1L;
-	private static XmlConfig config = null;
 	private static String logId = null;
 	private QueueModel mon = null;
 	private ConfigModel cfg = null;
@@ -74,15 +76,20 @@ public class Console extends HttpServlet
 	private synchronized boolean  initialize ()
 	{
 		String conf = getServletContext().getInitParameter("Configuration");
-		config = new XmlConfig ();
-		if (!config.load(new File (conf)))
+		PhineasConfig config = new PhineasConfig ();
+		if (!config.load (new File (conf)))
 		{
+			System.err.println ("ERROR: Console failed to load " + conf);
 			return false;
 		}
 		Thread.currentThread().setName("Console");
-		XmlConfig console = new XmlConfig ();
-		console.load(config.getFile("Console"));
-		logId = Log.xmlLogConfig (console.copy("Log"));
+		XmlConfig console = config.getConsole ();
+		if (console == null)
+		{
+			Log.error("Failed getting console configuration");
+			return false;
+		}
+		logId = Log.configure ((LogConfig) console.copy(new LogConfig (), "Log"));
 		Log.info("Configuring Console...");
 		// instantiate our queue and configuration models
 		cfg = new ConfigModel ();
@@ -92,7 +99,7 @@ public class Console extends HttpServlet
 		if (!mon.initialize(config))
 			return false;
 		ping = new PingModel ();
-		if (!ping.initialize (config))
+		if (!ping.initialize (config.getSender ()))
 			return false;
 		logs = new LogModel ();
 		Log.info("Console ready");

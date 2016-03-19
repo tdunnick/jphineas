@@ -20,6 +20,7 @@ package tdunnick.jphineas.receiver;
 
 
 import tdunnick.jphineas.xml.*;
+import tdunnick.jphineas.config.ServiceConfig;
 import tdunnick.jphineas.mime.*;
 
 /**
@@ -38,7 +39,7 @@ public abstract class ReceiverProcessor
 	 * @param config for this Route 
 	 * @return true if successful
 	 */
-	protected abstract boolean configure (XmlConfig config);
+	protected abstract boolean configure (ServiceConfig config);
   /**
    * Do any requested processing for this request and return a response
    * @param soap request to process

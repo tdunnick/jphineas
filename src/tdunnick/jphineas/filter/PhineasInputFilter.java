@@ -23,6 +23,7 @@ import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
+import tdunnick.jphineas.config.XmlConfig;
 import tdunnick.jphineas.xml.*;
 
 /**

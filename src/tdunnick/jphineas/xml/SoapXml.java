@@ -96,6 +96,8 @@ public class SoapXml extends XmlContent
 	public static final String data = hdr + "eb:MessageData.";
 	/** the prefix to acknowledgments */
 	public static final String ack = "soap-env:Envelope.soap-env:Header.eb:Acknowledgment.";
+	/** the prefix to error messages */
+	public static final String error = "soap-env:Envelope.soap-env:Header.eb:ErrorList";
 	/** the prefix to the body data in the envelope */
 	public static final String bdy = "soap-env:Envelope.soap-env:Body.";
 	/** the prefix to the manifest */
@@ -108,7 +110,7 @@ public class SoapXml extends XmlContent
 	 */
 	public SoapXml ()
 	{
-		super (template);
+		load (template);
 		setValue (manifest + "PeerVersion", JPhineas.name + " " + JPhineas.revision);
 	}
 	
@@ -117,7 +119,7 @@ public class SoapXml extends XmlContent
 	 */
 	public SoapXml (String xml)
 	{
-		super (xml);
+		load (xml);
 	}
 	
 	/**
@@ -463,18 +465,42 @@ public class SoapXml extends XmlContent
 		return setValue (ack + "eb:RefToMessageId", value);
 	}
 	
+	/******************************** error messages **************************************/
+	public String getError (int n)
+	{
+		String path = error + "[" + n + "].eb:Error";
+		String code = getAttribute(path, "eb:errorCode");
+		if (code == null)
+			return null;
+		return code + " - " + getValue (path);
+	}
+	
+	public boolean setError (int n, String code, String msg)
+	{
+		setValue (error + "[" + n + "].eb.Error", msg);		
+		setAttribute(error + "[" + n + "].eb:Error", "eb:errorCode", code);		
+		setAttribute(error + "[" + n + "].eb:Error", "eb:severity", "Error");
+		if (getAttribute (error, "eb:highestSeverity") == null)
+		{
+			setAttribute (error, "eb:highestSeverity", "Error");
+			setAttribute (error, "soap-env:mustUnderstand", "1");
+		}
+		return true;
+	}
+	
+	/****************************** misc ************************************************/
 	/**
 	 * Get all of the MetaData from a request
 	 */
 	public String getMetaData ()
 	{
 		String pre = "Manifest.MetatData.DatabaseInfo.";
-		XmlContent xml = new XmlContent ("<Manifest/>");
+		XmlContent xml = new XmlContent ();
 		xml.setValue(pre + "RecordId", getRecordId());
 		xml.setValue(pre + "MessageId", getDbMessageId());
 		xml.setValue(pre + "Arguments", getArguments());
 		xml.setValue(pre + "MessageRecipient", getRecipient());
-		xml.setValue(pre + "RecordId", getRecordId());
+		xml.beautify (0);
 		return xml.toString().replaceFirst ("^.*[?]>", "");
 	}
 

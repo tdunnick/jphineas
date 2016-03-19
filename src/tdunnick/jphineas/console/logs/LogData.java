@@ -31,7 +31,7 @@ public class LogData
   /** revision in the navigation bar */
   String version = JPhineas.revision;
   /** tabs for this screen */
-  ArrayList <LogConfig> logs = new ArrayList <LogConfig> ();
+  ArrayList <LogContext> logs = new ArrayList <LogContext> ();
 	public String getTitle()
 	{
 		return title;
@@ -40,7 +40,7 @@ public class LogData
 	{
 		return version;
 	}
-	public ArrayList<LogConfig> getLogs()
+	public ArrayList<LogContext> getLogs()
 	{
 		return logs;
 	}

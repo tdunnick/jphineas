@@ -5,29 +5,26 @@ import java.io.*;
 import javax.servlet.http.HttpServletRequest;
 
 import tdunnick.jphineas.xml.*;
+import tdunnick.jphineas.config.RouteConfig;
+import tdunnick.jphineas.config.SenderConfig;
 import tdunnick.jphineas.logging.*;
 import tdunnick.jphineas.queue.*;
 import tdunnick.jphineas.sender.ebxml.*;
 
 public class PingModel
 {
-	private XmlConfig sender = new XmlConfig ();
+	private SenderConfig sender = null;
   private ArrayList <String> routes = new ArrayList <String> ();
   private ArrayList <String> queues = new ArrayList <String> ();
  
-	public boolean initialize (XmlConfig config)
+	public boolean initialize (SenderConfig config)
 	{
-		File f = config.getFile ("Sender");
-		if ((f == null) || !sender.load(f))
-		{
-			Log.error ("Can't load Sender Configuration");
-			return false;
-		}
-		int n = sender.getTagCount("RouteInfo.Route");
+		sender = config;
+		int n = sender.getRouteCount();
 		for (int i = 0; i < n; i++)
 		{
-			String tag = "RouteInfo.Route[" + i + "].";
-			routes.add (sender.getValue(tag + "Name"));
+			RouteConfig c = sender.getRoute(i);
+			routes.add (c.getName());
 		}
 		queues = PhineasQManager.getInstance().getQueueNames("EbXmlSndQ");
 		return true;
@@ -61,17 +58,16 @@ public class PingModel
 		}
 		if (action.equals("Export"))
 		{
-			String cpaDir = sender.getDirectory ("CpaDirectory");
-			if (cpaDir.length() == 0)
-				cpaDir = sender.getDirectory (XmlConfig.DEFAULTDIR) + "CPA/";
-			File f = new File (cpaDir);
-			if (!f.exists())
-			  f.mkdirs();
+			String d = sender.getCpaDirectory();
 			int r = routes.indexOf(route);
 			if (r < 0)
 				return "Unknown route " + route;
-			CpaXml x = new CpaXml (sender.copy("RouteInfo.Route[" + r + "]"));
-			f = new File (cpaDir + x.getCpaName() + ".xml");
+			RouteConfig cfg = sender.getRoute (r);
+			CpaXml x = new CpaXml (cfg);
+			String cpaid = cfg.getCpa();
+			if (cpaid == null)
+				cpaid = x.getCpaName();
+			File f = new File (d + cpaid + ".xml");
 			if (x.save(f))
 			  return "CPA for route " + route  + " exported to " + f.getAbsolutePath();
 			return "failed to export CPA for " + route;

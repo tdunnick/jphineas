@@ -23,9 +23,9 @@ import java.util.*;
 import java.io.*;
 import java.sql.*;
 
+import tdunnick.jphineas.config.XmlConfig;
 import tdunnick.jphineas.logging.*;
 import tdunnick.jphineas.util.DateFmt;
-import tdunnick.jphineas.xml.XmlConfig;
 
 /**
  * A JDBC connection implementation for a jPhineas queue.
@@ -261,7 +261,7 @@ public class PhineasJDBCQ extends PhineasQConnection
 			{
 				File f = new File (s.substring(17));
 				if (!f.isAbsolute())
-					s = "jdbc:hsqldb:file:" + config.getValue(XmlConfig.DEFAULTDIR) 
+					s = "jdbc:hsqldb:file:" + config.findValue(config.DEFAULTDIR) 
 					  + "/" + f.getPath();
 			}
 		  // make the connection - (change to pooled driver manager?)

@@ -22,9 +22,9 @@ package tdunnick.jphineas.common;
 public class JPhineas
 {
   public static final String name = "jPhineas";
-  public static final String revision = "1.0 alpha";
-  public static final String updated = "May 7, 2015";
-  public static final String copyright = "&copy; 2015 Thomas L Dunnick" +
+  public static final String revision = "1.01 alpha";
+  public static final String updated = "April 19, 2016";
+  public static final String copyright = "&copy; 2015,2016 Thomas L Dunnick" +
     " - all rights reserved";
   public static final String projectUrl = "https://github.com/tdunnick/jphineas";
   public static final String homeUrl = "https://mywebspace.wisc.edu/tdunnick/web";
