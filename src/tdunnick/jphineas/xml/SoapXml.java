@@ -284,7 +284,73 @@ public class SoapXml extends XmlContent
 		return setAttribute (manifest + "eb:Reference", "xlink:href", value);
 	}
 	
+	/**
+	 * Get the chunking request id from the manifest
+	 * @return the request id
+	 */
+	public String getManifestChunkRequestId ()
+	{
+		String s = getValue (manifest + "ResponseChunking.RequestId");
+		if ((s != null) && (s.length() == 0))
+			s = null;
+		return s;
+	}
+
+	/**
+	 * Set the chunking request id in the manifest
+	 * @param value of the request id
+	 * @return true if successful
+	 */
+	public boolean setManifestChunkRequestId (String value)
+	{
+		return setValue (manifest + "ResponseChunking.RequestId", value);
+	}
 	
+	/**
+	 * Get the chunking request id from the manifest
+	 * @return the ResponseBlockSize
+	 */
+	public String getManifestChunkResponseBlockSize ()
+	{
+		String s = getValue (manifest + "ResponseChunking.ResponseBlockSize");
+		if ((s != null) && (s.length() == 0))
+			s = null;
+		return s;
+	}
+
+	/**
+	 * Set the chunking request id in the manifest
+	 * @param value of the ResponseBlockSize
+	 * @return true if successful
+	 */
+	public boolean setManifestChunkResponseBlockSize (String value)
+	{
+		return setValue (manifest + "ResponseChunking.ResponseBlockSize", value);
+	}
+	
+	/**
+	 * Get the Chunking from the manifest
+	 * @return the Chunking
+	 */
+	public String getManifestChunking ()
+	{
+		String s = getValue (manifest + "ResponseChunking.Chunking");
+		if ((s != null) && (s.length() == 0))
+			s = null;
+		return s;
+	}
+
+	/**
+	 * Set Chunking in the manifest
+	 * @param value of the Chunking ('begin', 'continue', 'done')
+	 * @return true if successful
+	 */
+	public boolean setManifestChunking (String value)
+	{
+		return setValue (manifest + "ResponseChunking.Chunking", value);
+	}
+	
+
 	/*********************************** MessageData ****************************/
 	
 	/**
@@ -425,6 +491,46 @@ public class SoapXml extends XmlContent
 		return setValue (dbinf + "RecordId", value);
 	}
 	
+	/**
+	 * Get the current part for chunked requests
+	 * @return the chunk's part
+	 */
+	public int getPart ()
+	{
+		return getInt (dbinf + "Part");
+	}
+	
+	/**
+	 * Set the current part for a chunked request
+	 * @param part for this chunk
+	 * @return true if successful
+	 */
+	public boolean setPart (int part)
+	{
+		return setValue (dbinf + "Part", "" + part);
+	}
+	
+	/**
+	 * Get the current part for chunked requests
+	 * @return the chunk's part
+	 */
+	public int getNumParts ()
+	{
+		return getInt (dbinf + "NumParts");
+	}
+	
+	/**
+	 * Set the current part for a chunked request
+	 * @param parts for this chunk
+	 * @return true if successful
+	 */
+	public boolean setNumParts (int parts)
+	{
+		return setValue (dbinf + "NumParts", "" + parts);
+	}
+	
+
+
 	/****************************** Acknowledgment *********************************/
 	
 	/**

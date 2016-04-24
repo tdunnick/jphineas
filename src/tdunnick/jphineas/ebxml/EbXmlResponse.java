@@ -59,7 +59,7 @@ public class EbXmlResponse
 		soap.setFromPartyId (request.getToPartyId());
 		soap.setToPartyId (request.getFromPartyId());
 		soap.setCPAId ("");
-		soap.setConversationId ("" + now.getTime());
+		soap.setConversationId (request.getConversationId());
 		soap.setService ("urn:oasis:names:tc:ebxml-msg:service");
 		soap.setAction (action);
 		soap.setHdrMessageId ("" +	now.getTime() + "@" + organization);

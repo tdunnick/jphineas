@@ -126,14 +126,14 @@ public class ReplyCache extends Cache
 	}
 
 	/**
-	 * The reply cache key is made up from the request partyID and messageId
-	 * TODO addition ID's for chunks, etc.
+	 * The reply cache key is made up from the request partyID and 
+	 * the message header data messageId which is unique for each message (chunk)
 	 * @param soap request
 	 * @return
 	 */
 	private String getKey (SoapXml soap)
 	{
-		String key = soap.getFromPartyId() + soap.getDbMessageId();
+		String key = soap.getFromPartyId() + soap.getHdrMessageId();
 		return key;
 	}
 }

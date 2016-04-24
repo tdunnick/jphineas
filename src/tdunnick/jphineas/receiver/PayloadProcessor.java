@@ -90,14 +90,23 @@ public class PayloadProcessor extends ReceiverProcessor
 		}
 		// and our destination directory
   	String dir = config.getPayloadDirectory();
+  	int numParts = request.getNumParts();
+  	int part = request.getPart();
+  	String chunkid = request.getManifestChunkRequestId();
+  	File f = null;
 		// decode payloads and note their responses
 		for (int i = 1; i < parts.length; i++)
 		{
 			rsp.reset ();
 			EbXmlAttachment a = new EbXmlAttachment (parts[i]);
-			File f = new File (dir + "/" + a.getName());
+			// set destination for chunked vs. complete message...
+			if (numParts > 0)
+				f = Chunker.locate(chunkid, part);
+			else
+			  f = new File (dir + "/" + a.getName());
 	  	row.setPayloadName (a.getName());
 	  	row.setLocalFileName (f.getAbsolutePath());
+	  	// handle encryption
 	  	boolean encrypted = a.isEncrypted();
 	  	row.setEncryption(encrypted ? "yes" : "no");
 			if (encrypted && (cert != null))
@@ -109,6 +118,7 @@ public class PayloadProcessor extends ReceiverProcessor
 	    	  rsp.set ("abnormal", s, "failure");
 			  }
 			}
+			// Log.debug("Saving payload to " + f.getAbsolutePath());
 			if (!a.savePayload(f))
 	  	{
 	  		String s = "Could not save payload for " + a.getName();
@@ -116,8 +126,17 @@ public class PayloadProcessor extends ReceiverProcessor
     	  rsp.set ("abnormal", s, "failure");
 	  	}
 			setRowResponse (row, rsp);
-			row.append ();
 			response.addMultiPart(rsp.get ());
+			// check chunked requests for completed transport
+			if (numParts > 0)
+			{
+				// don't update our queue until all chunks are received!
+				if (Chunker.chunks(chunkid) < numParts)
+					continue;
+				Log.debug("assembling " + numParts + " parts for " + a.getName ());
+				Chunker.assemble(new File (dir + "/" + a.getName()), chunkid);
+			}
+			row.append ();
 		}
 		return response;
 	}

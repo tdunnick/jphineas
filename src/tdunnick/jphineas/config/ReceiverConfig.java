@@ -2,9 +2,12 @@ package tdunnick.jphineas.config;
 
 import java.io.File;
 
+import tdunnick.jphineas.util.Chunker;
+
 public class ReceiverConfig extends PhineasConfig
 {
 	private final static String servicePath = "ServiceInfo.Service";
+	private final static String routePath = ".Sender.RouteInfo.Route";
 	
 	boolean init ()
 	{
@@ -15,6 +18,7 @@ public class ReceiverConfig extends PhineasConfig
 			return false;
 		if (forceFolder ("CacheDirectory", System.getProperty ("java.io.tmpdir")) == null)
 			return false;
+		Chunker.setDir(getCacheFolder());
 		return true;
 	}
 	
@@ -42,4 +46,15 @@ public class ReceiverConfig extends PhineasConfig
 	{
 		return (ServiceConfig) copy (new ServiceConfig (), servicePath + "[" + n + "].");
 	}
+	
+	public int getRouteCount ()
+	{
+		return getTagCount (routePath);
+	}
+	
+	public RouteConfig getRoute (int n)
+	{
+		return (RouteConfig) copy (new RouteConfig (), routePath + "[" + n + "].");
+	}	
+
 }
