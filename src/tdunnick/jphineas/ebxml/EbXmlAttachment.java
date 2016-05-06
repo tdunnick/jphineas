@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2015 Thomas Dunnick (https://mywebspace.wisc.edu/tdunnick/web)
+ *  Copyright (c) 2015-2016 Thomas Dunnick (https://mywebspace.wisc.edu/tdunnick/web)
  *  
  *  This file is part of jPhineas
  *
@@ -44,34 +44,32 @@ public class EbXmlAttachment
 	String id = null;
 	String name = null;
 	
+	/**
+	 * default constructor for a new empty attachment
+	 */
 	public EbXmlAttachment ()
 	{
 		super ();
 	}
-	
-	public EbXmlAttachment (byte[] payload, String id, String name)
-	{
-		set (payload, id, name);
-	}
-	
-	public EbXmlAttachment (File f, String id)
-	{
-		set (f, id);
-	}
-	
+		
+	/**
+	 * constructor for a mime attachment
+	 * @param part of mime having the attachment
+	 */
 	public EbXmlAttachment (MimeContent part)
 	{
 		set (part);
 	}
 	
-	public boolean set (File f, String id)
-	{
-		if (!loadPayload (f))
-			return false;
-		this.id = id;
-		return true;
-	}
-	
+	/**
+	 * Populates an empty attachment.  Note that encryption is done in a 
+	 * separate method.
+	 * 
+	 * @param payload to attach
+	 * @param id identifier which matches the "cid:" in the SOAP manifest
+	 * @param name of this attachment, typically the file name
+	 * @return true if successful
+	 */
 	public boolean set (byte[] payload, String id, String name)
 	{
 		if ((payload == null) || (id == null) || (name == null))
@@ -82,6 +80,11 @@ public class EbXmlAttachment
 		return true;
 	}
 	
+	/**
+	 * Populate this attachment from Mime content
+	 * @param part of Mime with the attachment
+	 * @return true if successful
+	 */
 	public boolean set (MimeContent part)
 	{
   	// check if this is a payload container
@@ -98,13 +101,18 @@ public class EbXmlAttachment
   	return set (pbody, pid, pname);
 	}
 	
+	/**
+	 * Generate a Mime attachment from what we have here
+	 * @return the attachment or null if nothing is set
+	 */
 	public MimeContent get ()
 	{
+		if (payload == null)
+			return null;
 		MimeContent mime = new MimeContent ();
 		mime.setContentId (id);
-		// mime.setEncoding(MimeContent.BASE64);
-		// mime.setContentType(MimeContent.OCTET);
 		mime.setDisposition ("attachement; name=\"" + name + "\"");
+		// encodeBody() will set content type and encoding
 		mime.encodeBody(payload);
 		return mime;
 	}
@@ -114,31 +122,11 @@ public class EbXmlAttachment
 		return get().toString ();
 	}
 	
-	public boolean loadPayload (File f)
-	{
-		if (!f.canRead())
-		{
-			Log.error ("Can't read " + f.getAbsolutePath());
-			return false;
-		}
-		byte[] p = null;
-		try
-		{
-			FileInputStream is = new FileInputStream (f);
-			p = new byte[is.available()];
-			is.read(p);
-			is.close();
-		}
-		catch (IOException ex)
-		{
-			Log.error ("Failed reading " + f.getPath() + ": " + ex.getMessage());
-			return false;
-		}
-		payload = p;
-		name = f.getName();
-		return true;
-	}
-	
+	/**
+	 * Write this payload to the file system
+	 * @param f file to write
+	 * @return true if successful
+	 */
 	public boolean savePayload (File f)
 	{
 		try
@@ -157,36 +145,67 @@ public class EbXmlAttachment
 		}
 	}
 	
+	/**
+	 * Populate the payload
+	 * @param payload to use
+	 */
 	public void setPayload (byte[] payload)
 	{
 		this.payload = payload;
 	}
 	
+  /**
+   * Get the current playload
+   * @return the payload
+   */
   public byte[] getPayload ()
   {
   	return payload;
   }
   
+  /**
+   * Populate the Content-ID of the payload
+   * @param id to use
+   */
   public void setId (String id)
   {
   	this.id = id;
   }
   
+  /**
+   * Get the Content-ID of the payload
+   * @return the id
+   */
   public String getId ()
   {
   	return id;
   }
   
+  /**
+   * Populate the (file) name of the payload
+   * @param name to use
+   */
   public void setName (String name)
   {
   	this.name = name;
   }
   
+  /**
+   * Get the (file) name of the payload
+   * @return the name
+   */
   public String getName ()
   {
   	return name;
   }
 
+  /**
+   * Encrypt the current payload to an XML encryption format.
+   * @param path to the encryption object (certificate, keystore, LDAP, etc)
+   * @param base keystore/cert password or LDAP baseDN
+   * @param dn for lookup in keystore or LDAP
+   * @return true if successful
+   */
   public boolean encrypt (String path, String base, String dn)
   {
   	if (path == null)
@@ -205,11 +224,22 @@ public class EbXmlAttachment
   	return true;
   }
   
+  /**
+   * Utility to determine if this payload has been encrypted
+   * @return true if encrypted
+   */
   public boolean isEncrypted ()
   {
   	return new String (payload).contains("<EncryptedData");
   }
   
+  /**
+   * Decrypts this payload in place.  Assumes XML encryption.
+   * 
+   * @param cert file holding the decryption certificate
+   * @param password for the certificate
+   * @return true if successful
+   */
   public boolean decrypt (File cert, String password)
   {	
 		XmlEncryptor crypt = new XmlEncryptor ();
@@ -219,154 +249,4 @@ public class EbXmlAttachment
     payload = p;
   	return true;
   }
-  
-	/**
-	public MimeContent getPayload (File f, String organization, 
-			String path, String base, String dn)
-	{
-		if (!f.canRead())
-		{
-			Log.error ("Can't read " + f.getAbsolutePath());
-			return null;
-		}
-		byte[] payload = null;
-		try
-		{
-			FileInputStream is = new FileInputStream (f);
-			payload = new byte[is.available()];
-			is.read(payload);
-			is.close();
-		}
-		catch (IOException ex)
-		{
-			Log.error ("Failed reading " + f.getPath() + ": " + ex.getMessage());
-			return null;
-		}
-		return getPayload (payload, f, organization, path, base, dn);
-	}
-
-	public MimeContent getPayload (byte[] payload, File f, String organization, 
-			String path, String base, String dn)
-	{
-		MimeContent part = new MimeContent ();
-		part.setHeader (MimeContent.CONTENTID, f.getName() 
-				+ "@" + organization);
-		part.setHeader(MimeContent.DISPOSITION, "attachement; name=\""
-				+ f.getName() + "\"");
-		if (path != null)
-		{
-			StringBuffer dnbuf = null;
-			if (dn != null)
-				dnbuf = new StringBuffer (dn);
-			XmlEncryptor crypt = new XmlEncryptor ();
-			String enc = crypt.encryptPayload(path, base, dnbuf, payload);
-			if (enc == null)
-			{
-				Log.error ("Failed to encrypt payload");
-				return null;
-			}
-		  part.setContentType(MimeContent.XML);
-		  part.setBody(enc);
-		}
-		else
-		{
-		  part.setContentType(MimeContent.OCTET);
-		  part.encodeBody(payload);
-		}
-	  // Log.debug("Payload part: " + part.toString());
-		return part;
-	}
-
-  public MimeContent parsePayloadContainer (MimeContent part)
-  {
-  	// check if this is a payload container
-  	String s = part.getHeader ("Content-Disposition");
-  	if ((s == null) || !s.startsWith("attachment"))
-  		return null;
-  	// assume all goes well
-  	MimeAppResponse rsp = new MimeAppResponse ();
-  	rsp.set ("success", "none", "none");
-  	// get the payload directory and file name
-  	String dir = config.getDirectory("PayloadDirectory");
-  	String filename = s.replaceFirst ("^.*name=\"([^\"]*).*$", "$1");
-  	Log.debug("payload file name=" + filename);
-  	if (filename.equals(s))
-  	{
-  		// make up a name...
-  		rsp.set ("abnormal", "missing file name", "warning");
-    	try
-    	{
-	    	File f = File.createTempFile(dir + "Unknown", "");
-	    	filename = f.getName();
-    	}
-    	catch (IOException e)
-    	{
-    	  Log.error (s = "Could not create payload file");
-    	  return rsp.get ("abnormal", "can't create file", "failure");
-    	}
-  	}
-  	// then get the payload, assume it is not encrypted
-  	byte[] payload;
-		row.setEncryption("no");
- 	// check for xml encryption 	
-  	if (part.getContentType().equals(MimeContent.XML))
-  	{
-  		// TODO check type for alternate decryption methods
-   	  XmlEncryptor crypt = new XmlEncryptor ();
-  		String password = config.getValue ("Decryption.Password");
-  		File cert = config.getFile("Decryption.Unc");
-  		if ((cert == null) || !cert.canRead())
-  		{
-  			Log.error ("Can't read certificate " + config.getValue("Decryption.Unc"));
-  			payload = part.decodeBody();
-  			// note we are saving an encrypted payload
-  	 		row.setEncryption("yes");
- 		}
-  		else
-  		{
-  	    payload = crypt.decryptPayload(cert.getAbsolutePath(), password, password, part.getBody());
-  		}
-  	}
-  	else
-  	{
-  	  payload = part.decodeBody();
-  	}
-  	row.setPayloadName (filename);
-  	row.setLocalFileName (dir + filename);
-  	if (payload == null)
-  	{
-  		Log.error (s = "Could not decode payload for " + filename);
-    	return rsp.get ("abnormal", s, "failure");
-  	}
-  	// save the file using a filter if given
-		try
-		{
-			OutputStream out = new FileOutputStream (dir + filename);
-			// add any user filter to this input
-			if (filter != null)
-			{
-				try
-				{
-					PhineasOutputFilter c_out = (PhineasOutputFilter) filter.newInstance(out);
-					c_out.configure (config.copy ("Filter"));
-					out = c_out;
-				}
-				catch (Exception e)
-				{
-					Log.error(s = "Couldn't load filter for " + config.getValue("Name"), e);
-					rsp.set ("abnormal", s, "warning");
-				}
-			}
-			// write the filtered data to the queue directory
-			out.write(payload);
-			out.close();
-		}
-		catch (IOException e)
-		{
-			Log.error(s = "Can't save payload to " + dir + filename, e);
-	  	rsp.set ("abnormal", s, "failure");
-		}
-  	return rsp.get();
-  }
-  */
 }

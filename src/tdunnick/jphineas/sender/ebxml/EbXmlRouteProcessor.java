@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2015 Thomas Dunnick (https://mywebspace.wisc.edu/tdunnick/web)
+ *  Copyright (c) 2015-2016 Thomas Dunnick (https://mywebspace.wisc.edu/tdunnick/web)
  *  
  *  This file is part of jPhineas
  *
@@ -130,26 +130,18 @@ public class EbXmlRouteProcessor extends RouteProcessor
 	{
   	if (row == null)
   		return false;
-  	// create our outgoing message
-  	MimeContent mime = pkg.getMessagePackage(row);
-  	if (mime == null)
-  		return complete (row);
-  	String req = config.getAuthenticationType();
-  	// insert BASIC authentication
-  	if ((req != null) && (req.equalsIgnoreCase("basic")))
+  	// get a soap request for this row
+  	SoapXml soap = pkg.getSoapRequest(row);
+  	// check for basic authentication
+  	String authid = null;
+  	String pw = config.getAuthenticationType();;
+  	if ((pw != null) && (pw.equalsIgnoreCase("basic")))
   	{
-  		mime.setBasicAuth(config.getAuthenticationId(), 
-  				config.getAuthenticationPassword());
+  		authid = config.getAuthenticationId(); 
+  		pw = config.getAuthenticationPassword();
   	}
-  	// set up a connection and response handler
-   	Socket socket = SocketFactory.createSocket(config);
-   	if ((socket == null) || !socket.isConnected())
-   	{
-   		Log.error("Failed to open connection to " + config.getHost());
-   		return false;
-   	}
    	// build a request string...
-   	req = "POST " 
+   	String req = "POST " 
    		+ config.getProtocol () + "://"
    		+ config.getHost () + ":"
    		+ config.getPort ()
@@ -158,22 +150,46 @@ public class EbXmlRouteProcessor extends RouteProcessor
    	// now ready to send it off
   	try
   	{
-			Log.debug("sending EbXml request:\n" + req + mime.toString());
-			OutputStream out = socket.getOutputStream();
-			InputStream in = socket.getInputStream();
-  		out.write(req.getBytes());
-			out.write(mime.toString().getBytes());
-			out.flush();
-			Log.debug("waiting for reply");
-			MimeContent msg = MimeReceiver.receive(in);
+  		Socket socket = null;
+			MimeContent mime = null;
+			// send all chunks over the same connection
+			while ((mime = pkg.getMessagePackage(soap, row)) != null)
+			{
+		  	// set up a connection
+				if (socket == null)
+				{
+		   	  if ((socket = SocketFactory.createSocket(config)) == null)
+			   	{
+			   		Log.error("Failed to open connection to " + config.getHost());
+			   		return false;
+			   	}
+				}
+				OutputStream out = socket.getOutputStream();
+				InputStream in = socket.getInputStream();
+		  	// insert BASIC authentication
+			  if (authid != null)
+			  	mime.setBasicAuth (authid, pw);
+				Log.debug("sending EbXml request:\n" + req + mime.toString());
+	  		out.write(req.getBytes());
+				out.write(mime.toString().getBytes());
+				out.flush();
+				Log.debug("waiting for reply");
+				MimeContent msg = MimeReceiver.receive(in);
+				// if the remote closed the socket, then clean up
+				if (!socket.isConnected() || true)
+				{
+					socket.close ();
+					socket = null;
+				}
+				// then parse the reply and update our row
+			  Log.debug ("response:\n" + msg.toString());
+			  if (!pkg.ParseMessagePackage(row, msg, soap.getHdrMessageId()))
+			  	break;
+			}
 			// TODO digest authentication response?
-			out.close();
-			in.close();
-			socket.close();
-			// finally parse the reply and update our row
-		  Log.debug ("response:\n" + msg.toString());
-		  if (pkg.ParseMessagePackage(row, msg))
-		  	return complete (row);
+			if (socket != null)
+				socket.close();
+	  	return complete (row);
   	}
   	catch (Exception e)
   	{

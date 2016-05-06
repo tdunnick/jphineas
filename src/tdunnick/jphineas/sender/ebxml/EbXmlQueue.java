@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2015 Thomas Dunnick (https://mywebspace.wisc.edu/tdunnick/web)
+ *  Copyright (c) 2015-2016 Thomas Dunnick (https://mywebspace.wisc.edu/tdunnick/web)
  *  
  *  This file is part of jPhineas
  *
@@ -45,13 +45,12 @@ public class EbXmlQueue
   {
   	if ((config == null) || (row == null))
   	  return false;
-		long pid = ProcessID.getNewId();
 		// note our encryption if any
 		String encType = config.getEncryptionType();
 		if (encType == null)
 			encType = "none";
 		// add the entry
-		row.setMessageId ("FOLDERPOLLING-" + pid);
+		row.setMessageId ("FOLDERPOLLING-" + ProcessID.get());
 		row.setRouteInfo (config.getRoute());
 		row.setService (config.getService());
 		row.setAction (config.getAction());

@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2015 Thomas Dunnick (https://mywebspace.wisc.edu/tdunnick/web)
+ *  Copyright (c) 2015-2016 Thomas Dunnick (https://mywebspace.wisc.edu/tdunnick/web)
  *  
  *  This file is part of jPhineas
  *
@@ -196,13 +196,15 @@ public class Receiver extends HttpServlet
 		if (parts == null)
 			return serverError (resp, "Not a multi-part Mime request");
 		// get the ebXML soap part
-		Log.debug("Loading request: " + parts[0].getBody());
+		// Log.debug("Loading request: " + parts[0].getBody());
 		SoapXml soap = new SoapXml (parts[0].getBody());
 		// make sure we got ebXML
 		if (!soap.ok ())
 		{
 			return serverError (resp, "Request is not ebXML SOAP");
 		}
+		soap.beautify(2);
+		Log.debug ("Request " + parts.length + " parts:" + soap.toString());
 		// check for a valid CPA
 		File cpa = new File (cpadir + soap.getCPAId () + ".xml");
 		if (!cpa.exists ())

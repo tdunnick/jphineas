@@ -80,6 +80,7 @@
 					<BaseDn />
 					<Dn />
 				</Authentication>
+				<ChunkSize></ChunkSize>				
 			</Route>
       <ProcessorInfo>
         <Processor>

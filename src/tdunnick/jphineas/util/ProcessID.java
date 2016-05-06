@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2015 Thomas Dunnick (https://mywebspace.wisc.edu/tdunnick/web)
+ *  Copyright (c) 2015-2016 Thomas Dunnick (https://mywebspace.wisc.edu/tdunnick/web)
  *  
  *  This file is part of jPhineas
  *
@@ -29,7 +29,7 @@ public class ProcessID
   	// all static
   }
   
-  public static synchronized final long getNewId ()
+  public static synchronized final long newID ()
   {
   	Date d = new Date();
   	if (d.getTime() <= processId)
@@ -39,8 +39,8 @@ public class ProcessID
   	return processId;
   }
   
-  public static synchronized final long getId ()
+  public static String get ()
   {
-  	return processId;
+  	return Long.toString(newID ());
   }
 }

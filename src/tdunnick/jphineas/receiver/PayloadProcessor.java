@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2015 Thomas Dunnick (https://mywebspace.wisc.edu/tdunnick/web)
+ *  Copyright (c) 2015-2016 Thomas Dunnick (https://mywebspace.wisc.edu/tdunnick/web)
  *  
  *  This file is part of jPhineas
  *
@@ -131,7 +131,7 @@ public class PayloadProcessor extends ReceiverProcessor
 			if (numParts > 0)
 			{
 				// don't update our queue until all chunks are received!
-				if (Chunker.chunks(chunkid) < numParts)
+				if (Chunker.saved (chunkid) < numParts)
 					continue;
 				Log.debug("assembling " + numParts + " parts for " + a.getName ());
 				Chunker.assemble(new File (dir + "/" + a.getName()), chunkid);

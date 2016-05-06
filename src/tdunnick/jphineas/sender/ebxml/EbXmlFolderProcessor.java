@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2015 Thomas Dunnick (https://mywebspace.wisc.edu/tdunnick/web)
+ *  Copyright (c) 2015-2016 Thomas Dunnick (https://mywebspace.wisc.edu/tdunnick/web)
  *  
  *  This file is part of jPhineas
  *
@@ -70,9 +70,8 @@ public class EbXmlFolderProcessor extends FolderProcessor
 	protected boolean process (File src)
 	{
 		Log.debug("Processing " + src.getPath() + " for " + config.getName());
-		long pid = ProcessID.getNewId();
 		// get a unique name
-		String fname = src.getName() + "." + pid;
+		String fname = src.getName() + "." + ProcessID.get();
 		// and move it to processed
 		File dst = new File (config.getProcessed().getPath() + "/" + fname);
 		// if the move fails, another process still has it open, probably the writer!

@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2015 Thomas Dunnick (https://mywebspace.wisc.edu/tdunnick/web)
+ *  Copyright (c) 2015-2016 Thomas Dunnick (https://mywebspace.wisc.edu/tdunnick/web)
  *  
  *  This file is part of jPhineas
  *
@@ -329,6 +329,28 @@ public class SoapXml extends XmlContent
 	}
 	
 	/**
+	 * Get the chunking request id from the manifest
+	 * @return the ResponseBlockSize
+	 */
+	public String getManifestChunkResponsePart()
+	{
+		String s = getValue (manifest + "ResponseChunking.ResponsePart");
+		if ((s != null) && (s.length() == 0))
+			s = null;
+		return s;
+	}
+
+	/**
+	 * Set the chunking request id in the manifest
+	 * @param value of the ResponseBlockSize
+	 * @return true if successful
+	 */
+	public boolean setManifestChunkResponsePart (String value)
+	{
+		return setValue (manifest + "ResponseChunking.ResponsePart", value);
+	}
+
+	/**
 	 * Get the Chunking from the manifest
 	 * @return the Chunking
 	 */
@@ -350,6 +372,16 @@ public class SoapXml extends XmlContent
 		return setValue (manifest + "ResponseChunking.Chunking", value);
 	}
 	
+  /**
+   * Check if we are done chunking.,
+   * @return true if all chunks are done
+   */
+  public boolean done ()
+  {
+  	String s = getManifestChunking ();
+  	return ((s == null) || (s.equals("done")));
+  }
+
 
 	/*********************************** MessageData ****************************/
 	
@@ -529,8 +561,6 @@ public class SoapXml extends XmlContent
 		return setValue (dbinf + "NumParts", "" + parts);
 	}
 	
-
-
 	/****************************** Acknowledgment *********************************/
 	
 	/**

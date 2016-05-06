@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2015 Thomas Dunnick (https://mywebspace.wisc.edu/tdunnick/web)
+ *  Copyright (c) 2015-2016 Thomas Dunnick (https://mywebspace.wisc.edu/tdunnick/web)
  *  
  *  This file is part of jPhineas
  *
@@ -105,6 +105,7 @@ public class QueueThread extends Pthread
 		}
 		// note we are attempting to transmit this file
 		r.setProcessingStatus ("attempted");
+		r.setLastUpdateTime(DateFmt.getTimeStamp(null));
 		if (r.update() < 0)
 		{
 			Log.error("Can't update row status");
@@ -129,6 +130,7 @@ public class QueueThread extends Pthread
   		if (!psleep (route.getTimeout()))
   			return false;
    	}
+		r.setLastUpdateTime(DateFmt.getTimeStamp(null));
 		return (running() && (r.update() >= 0));
 	}
 }

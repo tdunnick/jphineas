@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2015 Thomas Dunnick (https://mywebspace.wisc.edu/tdunnick/web)
+ *  Copyright (c) 2015-2016 Thomas Dunnick (https://mywebspace.wisc.edu/tdunnick/web)
  *  
  *  This file is part of jPhineas
  *
@@ -22,8 +22,8 @@ package tdunnick.jphineas.common;
 public class JPhineas
 {
   public static final String name = "jPhineas";
-  public static final String revision = "1.01 alpha";
-  public static final String updated = "April 19, 2016";
+  public static final String revision = "1.02 alpha";
+  public static final String updated = "May 6, 2016";
   public static final String copyright = "&copy; 2015,2016 Thomas L Dunnick" +
     " - all rights reserved";
   public static final String projectUrl = "https://github.com/tdunnick/jphineas";

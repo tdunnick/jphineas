@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2015 Thomas Dunnick (https://mywebspace.wisc.edu/tdunnick/web)
+ *  Copyright (c) 2015-2016 Thomas Dunnick (https://mywebspace.wisc.edu/tdunnick/web)
  *  
  *  This file is part of jPhineas
  *
@@ -18,7 +18,6 @@
  */
 
 package tdunnick.jphineas.sender;
-import tdunnick.jphineas.xml.*;
 import tdunnick.jphineas.config.RouteConfig;
 import tdunnick.jphineas.queue.*;
 
